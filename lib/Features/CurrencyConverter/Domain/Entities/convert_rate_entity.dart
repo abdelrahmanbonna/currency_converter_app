@@ -46,4 +46,15 @@ class ConvertRateEntity extends Equatable {
       to: to ?? this.to,
     );
   }
+
+  Map<String, dynamic> toMap() {
+    return {
+      'amount': amount,
+      'rate': rate,
+      'convertCurrency': convertCurrency,
+      'baseCurrency': baseCurrency,
+      'from': from?.toString(),
+      'to': to?.toString(),
+    };
+  }
 }

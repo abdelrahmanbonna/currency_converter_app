@@ -10,15 +10,6 @@ class ConvertRateModel extends ConvertRateEntity {
     super.to,
   });
 
-  Map<String, dynamic> toMap() {
-    return {
-      "from": super.from,
-      "to": super.to,
-      super.baseCurrency: super.amount,
-      super.convertCurrency: super.convertedAmount,
-    };
-  }
-
   factory ConvertRateModel.fromEntity(ConvertRateEntity entity) {
     return ConvertRateModel(
       convertCurrency: entity.convertCurrency,

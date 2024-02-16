@@ -1,5 +1,6 @@
 import 'package:currency_converter_app/Core/Config/app_theme.dart';
 import 'package:currency_converter_app/Features/CurrencyConverter/Presentation/Widgets/currency_converter_card.dart';
+import 'package:currency_converter_app/Features/CurrencyConverter/Presentation/Widgets/history_bottom_sheet.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 
@@ -32,7 +33,17 @@ class _CurrencyConverterHomeState extends State<CurrencyConverterHome> {
                 height: 10.h,
               ),
               FilledButton(
-                onPressed: () {},
+                onPressed: () {
+                  showModalBottomSheet(
+                    context: context,
+                    backgroundColor: Colors.transparent,
+                    isDismissible: true,
+                    isScrollControlled: true,
+                    builder: (contxt) {
+                      return const HistoryBottomSheet();
+                    },
+                  );
+                },
                 child: const Text(
                   'Get Historical Data',
                 ),
