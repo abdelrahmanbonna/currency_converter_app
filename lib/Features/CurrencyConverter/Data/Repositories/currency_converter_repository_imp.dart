@@ -62,7 +62,7 @@ class CurrencyConverterRepositoryImp implements CurrencyConverterRepository {
   }
 
   @override
-  Future<Result<List>> getCurrencies() async {
+  Future<Result<List<CurrencyEntity>>> getCurrencies() async {
     final result1 = await _cacheDataSource.getCurrencies();
 
     if (result1.statusCode == 200) {
