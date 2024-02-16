@@ -1,4 +1,4 @@
-import 'package:async/src/result/result.dart';
+import 'package:async/async.dart';
 import 'package:currency_converter_app/Core/Errors/failures.dart';
 import 'package:currency_converter_app/Features/CurrencyConverter/Data/DataSources/currency_converter_data_source.dart';
 import 'package:currency_converter_app/Features/CurrencyConverter/Data/Models/convert_rate_model.dart';
@@ -22,12 +22,34 @@ class CurrencyConverterRepositoryImp implements CurrencyConverterRepository {
         baseCurrency: info.baseCurrency,
         from: info.from,
         to: info.to,
-        rate: result.data["${info.baseCurrency}_${info.convertCurrency}"],
+        rate: result.data["data"][info.convertCurrency],
         amount: info.amount,
       ));
     } else {
-      return Result.error(ServerFailure(
-          "Server Failure\nStatus code:${result.statusCode}\nCouldn't get data from server"));
+      return Result.error(
+        ServerFailure(
+          "Server Failure\nStatus code:${result.statusCode}\nCouldn't get data from server",
+        ),
+      );
+    }
+  }
+
+  @override
+  Future<Result<List<ConvertRateEntity>>> getHistoricalRates(
+      ConvertRateEntity info) async {
+    //TODO implement converting the data
+
+    final result =
+        await _dataSource.getHistoricalData(ConvertRateModel.fromEntity(info));
+
+    if (result.statusCode == 200) {
+      return Result.value([]);
+    } else {
+      return Result.error(
+        ServerFailure(
+          "Server Failure\nStatus code:${result.statusCode}\nCouldn't get data from server",
+        ),
+      );
     }
   }
 }

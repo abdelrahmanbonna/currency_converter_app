@@ -8,6 +8,18 @@ import 'app_theme.dart';
 /// This key is used to make redirections outside the pages
 final GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();
 
+void showSnackBar(String message) {
+  ScaffoldMessenger.of(navigatorKey.currentState!.context).showSnackBar(
+    SnackBar(
+      content: Center(
+        child: Text(
+          message,
+        ),
+      ),
+    ),
+  );
+}
+
 class MyApp extends StatelessWidget {
   const MyApp({super.key});
 

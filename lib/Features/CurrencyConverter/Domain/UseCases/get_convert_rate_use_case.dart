@@ -1,4 +1,4 @@
-import 'package:async/src/result/result.dart';
+import 'package:async/async.dart';
 import 'package:currency_converter_app/Features/CurrencyConverter/Domain/Entities/convert_rate_entity.dart';
 import 'package:currency_converter_app/Features/CurrencyConverter/Domain/Repositories/currency_converter_repository.dart';
 

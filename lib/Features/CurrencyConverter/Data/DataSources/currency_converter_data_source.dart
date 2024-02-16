@@ -5,6 +5,7 @@ import 'package:dio/dio.dart';
 
 abstract class CurrencyConverterDataSource {
   Future<Response> getCurrencyConvert(ConvertRateModel data);
+  Future<Response> getHistoricalData(ConvertRateModel data);
 }
 
 class CurrencyConverterRemoteDataSource implements CurrencyConverterDataSource {
@@ -15,19 +16,32 @@ class CurrencyConverterRemoteDataSource implements CurrencyConverterDataSource {
   @override
   Future<Response> getCurrencyConvert(ConvertRateModel data) {
     Map<String, dynamic> queryParam = {
-      'q': "${data.baseCurrency}_${data.convertCurrency}",
-      'compact': 'ultra'
+      'base_currency': data.baseCurrency,
+      'currencies': data.convertCurrency,
+    };
+
+    return _networkService.unAuthedDio.get(
+      EndPointsPaths.convertEndPoint,
+      queryParameters: queryParam,
+    );
+  }
+
+  @override
+  Future<Response> getHistoricalData(ConvertRateModel data) {
+    Map<String, dynamic> queryParam = {
+      'base_currency': data.baseCurrency,
+      'currencies': data.convertCurrency,
     };
 
     if (data.from != null && data.to != null) {
-      queryParam['date'] =
+      queryParam['date_from'] =
           '${data.from!.year}-${data.from!.month}-${data.from!.day}';
-      queryParam['endDate'] =
+      queryParam['date_to'] =
           '${data.to!.year}-${data.to!.month}-${data.to!.day}';
     }
 
     return _networkService.unAuthedDio.get(
-      EndPointsPaths.convertEndPoint,
+      EndPointsPaths.historicalDataEndPoint,
       queryParameters: queryParam,
     );
   }

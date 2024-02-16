@@ -1,21 +1,19 @@
 part of './currency_converter_bloc.dart';
 
 abstract class CurrencyConverterState extends Equatable {
-  const CurrencyConverterState();
+  final double convertedAmount;
+  const CurrencyConverterState(this.convertedAmount);
 }
 
 class CurrencyConverterInitial extends CurrencyConverterState {
-  final double convertedAmount = 0;
+  const CurrencyConverterInitial(super.convertedAmount);
 
   @override
   List<Object> get props => [convertedAmount];
 }
 
 class CurrencyConverterConvertSuccess extends CurrencyConverterState {
-  final double convertedAmount;
-  const CurrencyConverterConvertSuccess({
-    required this.convertedAmount,
-  });
+  const CurrencyConverterConvertSuccess(super.convertedAmount);
 
   @override
   List<Object?> get props => [convertedAmount];
