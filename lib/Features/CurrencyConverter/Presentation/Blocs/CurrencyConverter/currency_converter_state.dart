@@ -18,3 +18,11 @@ class CurrencyConverterConvertSuccess extends CurrencyConverterState {
   @override
   List<Object?> get props => [convertedAmount];
 }
+
+class CurrenciesFetchSuccess extends CurrencyConverterState {
+  final List<CurrencyEntity> currencyList;
+  const CurrenciesFetchSuccess(super.convertedAmount, this.currencyList);
+
+  @override
+  List<Object?> get props => [convertedAmount];
+}

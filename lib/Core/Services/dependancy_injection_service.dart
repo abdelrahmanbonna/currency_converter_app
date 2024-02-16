@@ -1,6 +1,7 @@
 import 'package:currency_converter_app/Features/CurrencyConverter/Data/DataSources/currency_converter_cache_data_source.dart';
 import 'package:currency_converter_app/Features/CurrencyConverter/Data/Repositories/currency_converter_repository_imp.dart';
 import 'package:currency_converter_app/Features/CurrencyConverter/Domain/UseCases/get_convert_rate_use_case.dart';
+import 'package:currency_converter_app/Features/CurrencyConverter/Domain/UseCases/get_currencies_use_case.dart';
 import 'package:currency_converter_app/Features/CurrencyConverter/Presentation/Blocs/CurrencyConverter/currency_converter_bloc.dart';
 import 'package:currency_converter_app/Features/CurrencyConverter/Presentation/Blocs/ExchangeRates/exchange_rates_bloc.dart';
 import 'package:dio/dio.dart';
@@ -62,11 +63,14 @@ class DependencyInjectionService {
     sl.registerLazySingleton<GetConvertRateUseCase>(
       () => GetConvertRateUseCase(sl()),
     );
+    sl.registerLazySingleton<GetCurrenciesUseCase>(
+      () => GetCurrenciesUseCase(sl()),
+    );
   }
 
   Future<void> registerBlocs() async {
     sl.registerLazySingleton<CurrencyConverterBloc>(
-      () => CurrencyConverterBloc(sl()),
+      () => CurrencyConverterBloc(sl(), sl()),
     );
     sl.registerLazySingleton<ExchangeRatesBloc>(
       () => ExchangeRatesBloc(),

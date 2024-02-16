@@ -18,3 +18,8 @@ class ConvertCurrencyEvent extends CurrencyConverterEvent {
   @override
   List<Object?> get props => [amount, baseCurrency, convertCurrency];
 }
+
+class GetCurrenciesEvent extends CurrencyConverterEvent {
+  @override
+  List<Object?> get props => [];
+}
