@@ -24,16 +24,20 @@ dependencies:
   # handles screen sizes
   flutter_screenutil: ^5.9.0
   # handles dependency injection
-  get_it: ^7.6.7
+  get_it: ^7.6.4
   # NoSQL DataBase
   hive: ^2.2.3
   hive_flutter: ^1.1.0
-  # Bouncing buttons animations
+  # handles buttons
   flutter_bounceable: ^1.1.0
   # SVG images
   flutter_svg: ^2.0.9
   # currency picker
   currency_picker: ^2.0.20
+  # charts
+  fl_chart: ^0.65.0
+  # date range picker
+  syncfusion_flutter_datepicker: ^24.1.41
 
 dev_dependencies:
   flutter_test:
