@@ -67,35 +67,25 @@ class CurrencyConverterRepositoryImp implements CurrencyConverterRepository {
           await _dataSource.getHistoricalData(ConvertRateModel.fromEntity(info));
 
       if (result.statusCode == 200) {
-        final String pairKey = '${info.baseCurrency}_${info.convertCurrency}';
-        final rateData = result.data['results'][pairKey];
-        
-        if (rateData == null) {
-          return Result.error(
-            ServerFailure(
-              "Invalid response: Missing historical rate data",
-            ),
-          );
-        }
-
         final List<ConvertRateEntity> rates = [];
+        final Map<String, dynamic> historicalData = result.data;
         
-        // If historical data is available in a time series format
-        if (rateData is Map<String, dynamic>) {
-          rateData.forEach((date, value) {
-            if (value is Map<String, dynamic>) {
-              rates.add(ConvertRateEntity(
-                convertCurrency: info.convertCurrency,
-                baseCurrency: info.baseCurrency,
-                rate: (value['val'] as num).toDouble(),
-                from: DateTime.tryParse(date),
-                to: DateTime.tryParse(date),
-                amount: info.amount,
-              ));
-            }
-          });
-        }
+        historicalData.forEach((date, value) {
+          if (value != null) {
+            rates.add(ConvertRateEntity(
+              convertCurrency: info.convertCurrency,
+              baseCurrency: info.baseCurrency,
+              rate: (value as num).toDouble(),
+              from: DateTime.parse(date),
+              to: DateTime.parse(date),
+              amount: info.amount,
+            ));
+          }
+        });
 
+        // Sort rates by date
+        rates.sort((a, b) => a.from!.compareTo(b.from!));
+        
         return Result.value(rates);
       } else {
         return Result.error(

@@ -1,4 +1,5 @@
 import 'package:dio/dio.dart';
+import 'package:intl/intl.dart';
 
 import '../../../../Core/Config/end_points_paths.dart';
 import '../../../../Core/Services/network_service.dart';
@@ -25,17 +26,18 @@ class CurrencyConverterRemoteDataSource implements CurrencyConverterDataSource {
 
   @override
   Future<Response> getHistoricalData(ConvertRateModel data) {
+    if (data.from == null || data.to == null) {
+      throw ArgumentError('From and To dates are required for historical data');
+    }
+
+    final dateFormat = DateFormat('yyyy-MM-dd');
     Map<String, dynamic> queryParam = {
       'q': '${data.baseCurrency}_${data.convertCurrency}',
       EndPointsPaths.apiKeyParamName: EndPointsPaths.apiKey,
+      'date': dateFormat.format(data.from!),
+      'endDate': dateFormat.format(data.to!),
+      'compact': 'ultra'
     };
-
-    if (data.from != null && data.to != null) {
-      queryParam['date_from'] =
-          '${data.from!.year}-${data.from!.month}-${data.from!.day}';
-      queryParam['date_to'] =
-          '${data.to!.year}-${data.to!.month}-${data.to!.day}';
-    }
 
     return _networkService.unAuthedDio.get(
       EndPointsPaths.historicalDataEndPoint,

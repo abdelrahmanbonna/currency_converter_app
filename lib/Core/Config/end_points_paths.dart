@@ -9,7 +9,7 @@ class EndPointsPaths {
   static String currenciesEndPoint = '/api/v7/currencies';
 
   // Historical conversion rates
-  static String historicalDataEndPoint = '/api/v7/convert';
+  static String historicalDataEndPoint = '/api/v7/convert/history';
 
   // Query parameters
   static const String compactParam = 'compact=ultra';
