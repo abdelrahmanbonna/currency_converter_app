@@ -17,26 +17,43 @@ class CurrencyConverterRepositoryImp implements CurrencyConverterRepository {
   @override
   Future<Result<ConvertRateEntity>> getConvertRates(
       ConvertRateEntity info) async {
-    final result =
-        await _dataSource.getCurrencyConvert(ConvertRateModel.fromEntity(info));
+    try {
+      final result =
+          await _dataSource.getCurrencyConvert(ConvertRateModel.fromEntity(info));
 
-    if (result.statusCode == 200) {
-      var data = ConvertRateEntity(
-        convertCurrency: info.convertCurrency,
-        baseCurrency: info.baseCurrency,
-        from: info.from,
-        to: info.to,
-        rate: result.data["data"][info.convertCurrency],
-        amount: info.amount,
-      );
+      if (result.statusCode == 200) {
+        final String pairKey = '${info.baseCurrency}_${info.convertCurrency}';
+        final rateData = result.data['results'][pairKey];
+        
+        if (rateData == null) {
+          return Result.error(
+            ServerFailure(
+              "Invalid response: Missing conversion rate data",
+            ),
+          );
+        }
 
-      return Result.value(
-        data,
-      );
-    } else {
+        var data = ConvertRateEntity(
+          convertCurrency: rateData['to'],
+          baseCurrency: rateData['fr'],
+          from: info.from,
+          to: info.to,
+          rate: (rateData['val'] as num).toDouble(),
+          amount: info.amount,
+        );
+
+        return Result.value(data);
+      } else {
+        return Result.error(
+          ServerFailure(
+            "Server Failure\nStatus code:${result.statusCode}\nCouldn't get data from server",
+          ),
+        );
+      }
+    } catch (e) {
       return Result.error(
         ServerFailure(
-          "Server Failure\nStatus code:${result.statusCode}\nCouldn't get data from server",
+          "Error processing response: ${e.toString()}",
         ),
       );
     }
@@ -45,17 +62,52 @@ class CurrencyConverterRepositoryImp implements CurrencyConverterRepository {
   @override
   Future<Result<List<ConvertRateEntity>>> getHistoricalRates(
       ConvertRateEntity info) async {
-    //TODO implement converting the data
+    try {
+      final result =
+          await _dataSource.getHistoricalData(ConvertRateModel.fromEntity(info));
 
-    final result =
-        await _dataSource.getHistoricalData(ConvertRateModel.fromEntity(info));
+      if (result.statusCode == 200) {
+        final String pairKey = '${info.baseCurrency}_${info.convertCurrency}';
+        final rateData = result.data['results'][pairKey];
+        
+        if (rateData == null) {
+          return Result.error(
+            ServerFailure(
+              "Invalid response: Missing historical rate data",
+            ),
+          );
+        }
 
-    if (result.statusCode == 200) {
-      return Result.value([]);
-    } else {
+        final List<ConvertRateEntity> rates = [];
+        
+        // If historical data is available in a time series format
+        if (rateData is Map<String, dynamic>) {
+          rateData.forEach((date, value) {
+            if (value is Map<String, dynamic>) {
+              rates.add(ConvertRateEntity(
+                convertCurrency: info.convertCurrency,
+                baseCurrency: info.baseCurrency,
+                rate: (value['val'] as num).toDouble(),
+                from: DateTime.tryParse(date),
+                to: DateTime.tryParse(date),
+                amount: info.amount,
+              ));
+            }
+          });
+        }
+
+        return Result.value(rates);
+      } else {
+        return Result.error(
+          ServerFailure(
+            "Server Failure\nStatus code:${result.statusCode}\nCouldn't get historical data",
+          ),
+        );
+      }
+    } catch (e) {
       return Result.error(
         ServerFailure(
-          "Server Failure\nStatus code:${result.statusCode}\nCouldn't get data from server",
+          "Error processing historical data: ${e.toString()}",
         ),
       );
     }
@@ -63,34 +115,35 @@ class CurrencyConverterRepositoryImp implements CurrencyConverterRepository {
 
   @override
   Future<Result<List<CurrencyEntity>>> getCurrencies() async {
-    final result1 = await _cacheDataSource.getCurrencies();
-
-    if (result1.statusCode == 200) {
-      List<CurrencyEntity> list = [];
-      for (var value in (result1.data['data'] as Iterable)) {
-        list.add(CurrencyEntity.fromJson(value));
-      }
-
-      return Result.value(list);
-    } else {
+    try {
       final result = await _dataSource.getCurrencies();
 
       if (result.statusCode == 200) {
-        _cacheDataSource.setCurrencyData(result.data['data']);
+        final Map<String, dynamic> currenciesData = result.data['results'];
+        final List<CurrencyEntity> currencies = [];
 
-        List<CurrencyEntity> list = [];
-        (result.data['data'] as Map).forEach((key, value) {
-          list.add(CurrencyEntity.fromJson(value));
+        currenciesData.forEach((code, data) {
+          currencies.add(CurrencyEntity(
+            code: code,
+            name: data['currencyName'] ?? '',
+            symbol: data['currencySymbol'] ?? '',
+          ));
         });
 
-        return Result.value(list);
+        return Result.value(currencies);
       } else {
         return Result.error(
           ServerFailure(
-            "Server Failure\nStatus code:${result.statusCode}\nCouldn't get data from server",
+            "Server Failure\nStatus code:${result.statusCode}\nCouldn't get currencies",
           ),
         );
       }
+    } catch (e) {
+      return Result.error(
+        ServerFailure(
+          "Error processing currencies: ${e.toString()}",
+        ),
+      );
     }
   }
 }
