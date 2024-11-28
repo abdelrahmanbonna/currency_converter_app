@@ -15,6 +15,7 @@ class CurrencyConverterRemoteDataSource implements CurrencyConverterDataSource {
     Map<String, dynamic> queryParam = {
       'base_currency': data.baseCurrency,
       'currencies': data.convertCurrency,
+      EndPointsPaths.apiKeyParamName: EndPointsPaths.apiKey,
     };
 
     return _networkService.unAuthedDio.get(
@@ -28,6 +29,7 @@ class CurrencyConverterRemoteDataSource implements CurrencyConverterDataSource {
     Map<String, dynamic> queryParam = {
       'base_currency': data.baseCurrency,
       'currencies': data.convertCurrency,
+      EndPointsPaths.apiKeyParamName: EndPointsPaths.apiKey,
     };
 
     if (data.from != null && data.to != null) {
@@ -48,7 +50,8 @@ class CurrencyConverterRemoteDataSource implements CurrencyConverterDataSource {
     return _networkService.unAuthedDio.get(
       EndPointsPaths.currenciesEndPoint,
       queryParameters: {
-        "currencies": "",
+        'currencies': '',
+        EndPointsPaths.apiKeyParamName: EndPointsPaths.apiKey,
       },
     );
   }

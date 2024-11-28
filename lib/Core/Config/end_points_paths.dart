@@ -1,4 +1,7 @@
 class EndPointsPaths {
+  // API Configuration
+  static const String apiKey = 'f913b0a987ac2f63f720';
+  
   // Real-time currency conversion
   static String convertEndPoint = '/api/v7/convert';
   
@@ -10,5 +13,5 @@ class EndPointsPaths {
   
   // Query parameters
   static const String compactParam = 'compact=ultra';
-  static const String apiKeyParam = 'apiKey=';
+  static const String apiKeyParamName = 'apikey';
 }

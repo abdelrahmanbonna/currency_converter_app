@@ -23,7 +23,7 @@ void main() {
   });
 
   group('getCurrencyConvert', () {
-    final tConvertRateModel = ConvertRateModel(
+    const tConvertRateModel = ConvertRateModel(
       baseCurrency: 'USD',
       convertCurrency: 'EUR',
     );
@@ -46,11 +46,13 @@ void main() {
         queryParameters: {
           'base_currency': 'USD',
           'currencies': 'EUR',
+          EndPointsPaths.apiKeyParamName: EndPointsPaths.apiKey,
         },
       ));
     });
 
-    test('should throw exception when the response is not successful', () async {
+    test('should throw exception when the response is not successful',
+        () async {
       // arrange
       when(mockDio.get(any, queryParameters: anyNamed('queryParameters')))
           .thenThrow(DioException(
@@ -85,7 +87,9 @@ void main() {
           .thenAnswer((_) async => Response(
                 requestOptions: RequestOptions(path: ''),
                 statusCode: 200,
-                data: {'2024-01-01': {'USD_EUR': 0.85}},
+                data: {
+                  '2024-01-01': {'USD_EUR': 0.85}
+                },
               ));
 
       // act
@@ -99,13 +103,15 @@ void main() {
           'currencies': 'EUR',
           'date_from': '2024-1-1',
           'date_to': '2024-1-7',
+          EndPointsPaths.apiKeyParamName: EndPointsPaths.apiKey,
         },
       ));
     });
   });
 
   group('getCurrencies', () {
-    test('should perform a GET request to fetch available currencies', () async {
+    test('should perform a GET request to fetch available currencies',
+        () async {
       // arrange
       when(mockDio.get(any, queryParameters: anyNamed('queryParameters')))
           .thenAnswer((_) async => Response(
@@ -122,7 +128,10 @@ void main() {
       // assert
       verify(mockDio.get(
         EndPointsPaths.currenciesEndPoint,
-        queryParameters: {'currencies': ''},
+        queryParameters: {
+          'currencies': '',
+          EndPointsPaths.apiKeyParamName: EndPointsPaths.apiKey,
+        },
       ));
     });
   });

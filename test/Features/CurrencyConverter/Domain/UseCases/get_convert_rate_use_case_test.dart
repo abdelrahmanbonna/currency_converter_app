@@ -18,7 +18,7 @@ void main() {
     useCase = GetConvertRateUseCase(mockRepository);
   });
 
-  final tConvertRateEntity = ConvertRateEntity(
+  const tConvertRateEntity = ConvertRateEntity(
     baseCurrency: 'USD',
     convertCurrency: 'EUR',
     rate: 0.85,
