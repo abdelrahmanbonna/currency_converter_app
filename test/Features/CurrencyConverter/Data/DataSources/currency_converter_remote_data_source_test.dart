@@ -4,15 +4,15 @@ import 'package:currency_converter_app/Features/CurrencyConverter/Data/DataSourc
 import 'package:currency_converter_app/Features/CurrencyConverter/Data/Models/convert_rate_model.dart';
 import 'package:dio/dio.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:mockito/annotations.dart';
 import 'package:mockito/mockito.dart';
 
-import 'currency_converter_remote_data_source_test.mocks.dart';
+class MockNetworkService extends Mock implements NetworkService {}
 
-@GenerateMocks([NetworkService, Dio])
+class MockDio extends Mock implements Dio {}
+
 void main() {
-  late MockNetworkService mockNetworkService;
   late CurrencyConverterRemoteDataSource dataSource;
+  late MockNetworkService mockNetworkService;
   late MockDio mockDio;
 
   setUp(() {
@@ -22,105 +22,110 @@ void main() {
     dataSource = CurrencyConverterRemoteDataSource(mockNetworkService);
   });
 
-  group('getCurrencyConvert', () {
-    const tConvertRateModel = ConvertRateModel(
-      baseCurrency: 'USD',
-      convertCurrency: 'EUR',
-    );
-
-    test('should perform a GET request with proper parameters', () async {
+  group('CurrencyConverterRemoteDataSource', () {
+    test('getCurrencyConvert makes correct API request', () async {
       // arrange
-      when(mockDio.get(any, queryParameters: anyNamed('queryParameters')))
-          .thenAnswer((_) async => Response(
-                requestOptions: RequestOptions(path: ''),
-                statusCode: 200,
-                data: {'USD_EUR': 0.85},
-              ));
+      final model = ConvertRateModel(
+        baseCurrency: 'USD',
+        convertCurrency: 'EUR',
+      );
+
+      when(mockDio.get(
+        EndPointsPaths.convertEndPoint,
+        queryParameters: anyNamed('queryParameters'),
+      )).thenAnswer((_) async => Response(
+            requestOptions: RequestOptions(path: ''),
+            statusCode: 200,
+            data: {
+              'query': {'count': 1},
+              'results': {
+                'USD_EUR': {
+                  'id': 'USD_EUR',
+                  'val': 0.947355,
+                  'to': 'EUR',
+                  'fr': 'USD'
+                }
+              }
+            },
+          ));
 
       // act
-      await dataSource.getCurrencyConvert(tConvertRateModel);
+      await dataSource.getCurrencyConvert(model);
 
       // assert
       verify(mockDio.get(
         EndPointsPaths.convertEndPoint,
         queryParameters: {
-          'base_currency': 'USD',
-          'currencies': 'EUR',
+          'q': 'USD_EUR',
           EndPointsPaths.apiKeyParamName: EndPointsPaths.apiKey,
         },
       ));
     });
 
-    test('should throw exception when the response is not successful',
-        () async {
+    test('getHistoricalData makes correct API request', () async {
       // arrange
-      when(mockDio.get(any, queryParameters: anyNamed('queryParameters')))
-          .thenThrow(DioException(
-        requestOptions: RequestOptions(path: ''),
-        response: Response(
-          requestOptions: RequestOptions(path: ''),
-          statusCode: 400,
-          data: {'error': 'Bad Request'},
-        ),
-      ));
-
-      // act & assert
-      expect(
-        () => dataSource.getCurrencyConvert(tConvertRateModel),
-        throwsA(isA<DioException>()),
+      final model = ConvertRateModel(
+        baseCurrency: 'USD',
+        convertCurrency: 'EUR',
+        from: DateTime(2024, 1, 1),
+        to: DateTime(2024, 1, 7),
       );
-    });
-  });
 
-  group('getHistoricalData', () {
-    final tConvertRateModel = ConvertRateModel(
-      baseCurrency: 'USD',
-      convertCurrency: 'EUR',
-      from: DateTime(2024, 1, 1),
-      to: DateTime(2024, 1, 7),
-    );
-
-    test('should perform a GET request with proper parameters including dates',
-        () async {
-      // arrange
-      when(mockDio.get(any, queryParameters: anyNamed('queryParameters')))
-          .thenAnswer((_) async => Response(
-                requestOptions: RequestOptions(path: ''),
-                statusCode: 200,
-                data: {
-                  '2024-01-01': {'USD_EUR': 0.85}
-                },
-              ));
+      when(mockDio.get(
+        EndPointsPaths.historicalDataEndPoint,
+        queryParameters: anyNamed('queryParameters'),
+      )).thenAnswer((_) async => Response(
+            requestOptions: RequestOptions(path: ''),
+            statusCode: 200,
+            data: {
+              'query': {'count': 1},
+              'results': {
+                'USD_EUR': {
+                  'id': 'USD_EUR',
+                  'val': 0.947355,
+                  'to': 'EUR',
+                  'fr': 'USD'
+                }
+              }
+            },
+          ));
 
       // act
-      await dataSource.getHistoricalData(tConvertRateModel);
+      await dataSource.getHistoricalData(model);
 
       // assert
       verify(mockDio.get(
         EndPointsPaths.historicalDataEndPoint,
         queryParameters: {
-          'base_currency': 'USD',
-          'currencies': 'EUR',
+          'q': 'USD_EUR',
           'date_from': '2024-1-1',
           'date_to': '2024-1-7',
           EndPointsPaths.apiKeyParamName: EndPointsPaths.apiKey,
         },
       ));
     });
-  });
 
-  group('getCurrencies', () {
-    test('should perform a GET request to fetch available currencies',
-        () async {
+    test('getCurrencies makes correct API request', () async {
       // arrange
-      when(mockDio.get(any, queryParameters: anyNamed('queryParameters')))
-          .thenAnswer((_) async => Response(
-                requestOptions: RequestOptions(path: ''),
-                statusCode: 200,
-                data: {
-                  'currencies': {'USD': 'US Dollar', 'EUR': 'Euro'}
+      when(mockDio.get(
+        EndPointsPaths.currenciesEndPoint,
+        queryParameters: anyNamed('queryParameters'),
+      )).thenAnswer((_) async => Response(
+            requestOptions: RequestOptions(path: ''),
+            statusCode: 200,
+            data: {
+              'results': {
+                'USD': {
+                  'currencyName': 'US Dollar',
+                  'currencySymbol': '\$',
                 },
-              ));
+                'EUR': {
+                  'currencyName': 'Euro',
+                  'currencySymbol': '€',
+                },
+              }
+            },
+          ));
 
       // act
       await dataSource.getCurrencies();

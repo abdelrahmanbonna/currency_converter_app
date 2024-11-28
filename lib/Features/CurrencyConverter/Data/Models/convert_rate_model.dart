@@ -20,4 +20,32 @@ class ConvertRateModel extends ConvertRateEntity {
       rate: entity.rate,
     );
   }
+
+  factory ConvertRateModel.fromJson(Map<String, dynamic> json) {
+    final String pairKey = json['results'].keys.first;
+    final result = json['results'][pairKey];
+    
+    return ConvertRateModel(
+      convertCurrency: result['to'],
+      baseCurrency: result['fr'],
+      rate: result['val'].toDouble(),
+      amount: 1.0, // Default amount
+    );
+  }
+
+  Map<String, dynamic> toJson() {
+    return {
+      'query': {
+        'count': 1,
+      },
+      'results': {
+        '${baseCurrency}_$convertCurrency': {
+          'id': '${baseCurrency}_$convertCurrency',
+          'val': rate,
+          'to': convertCurrency,
+          'fr': baseCurrency,
+        },
+      },
+    };
+  }
 }

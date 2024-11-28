@@ -13,8 +13,7 @@ class CurrencyConverterRemoteDataSource implements CurrencyConverterDataSource {
   @override
   Future<Response> getCurrencyConvert(ConvertRateModel data) {
     Map<String, dynamic> queryParam = {
-      'base_currency': data.baseCurrency,
-      'currencies': data.convertCurrency,
+      'q': '${data.baseCurrency}_${data.convertCurrency}',
       EndPointsPaths.apiKeyParamName: EndPointsPaths.apiKey,
     };
 
@@ -27,8 +26,7 @@ class CurrencyConverterRemoteDataSource implements CurrencyConverterDataSource {
   @override
   Future<Response> getHistoricalData(ConvertRateModel data) {
     Map<String, dynamic> queryParam = {
-      'base_currency': data.baseCurrency,
-      'currencies': data.convertCurrency,
+      'q': '${data.baseCurrency}_${data.convertCurrency}',
       EndPointsPaths.apiKeyParamName: EndPointsPaths.apiKey,
     };
 
