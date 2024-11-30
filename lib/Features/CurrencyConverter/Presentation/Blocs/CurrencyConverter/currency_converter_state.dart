@@ -20,9 +20,12 @@ class CurrencyConverterConvertSuccess extends CurrencyConverterState {
 }
 
 class CurrenciesFetchSuccess extends CurrencyConverterState {
-  final List<CurrencyEntity> currencyList;
-  const CurrenciesFetchSuccess(super.convertedAmount, this.currencyList);
+  final double convertedAmount;
+  final List<CurrencyEntity> currencies;
+
+  const CurrenciesFetchSuccess(this.convertedAmount, this.currencies)
+      : super(0.0);
 
   @override
-  List<Object?> get props => [convertedAmount];
+  List<Object?> get props => [convertedAmount, currencies];
 }

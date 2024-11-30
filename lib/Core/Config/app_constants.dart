@@ -4,4 +4,5 @@ class AppConstants {
   static const String apiKey = 'f913b0a987ac2f63f720';
   static const String currencyDBKey = 'currencies-db';
   static const String exchangeRatesDBKey = 'exchange-rates-db';
+  static const String historicalRatesDBKey = 'historical-rates-db';
 }

@@ -88,14 +88,14 @@ class _FakeResponse_5<T1> extends _i1.SmartFake implements _i2.Response<T1> {
 ///
 /// See the documentation for Mockito's code generation for more information.
 class MockNetworkService extends _i1.Mock implements _i3.NetworkService {
-  MockNetworkService() {
-    _i1.throwOnMissingStub(this);
-  }
-
   @override
   _i2.Dio get unAuthedDio => (super.noSuchMethod(
         Invocation.getter(#unAuthedDio),
         returnValue: _FakeDio_0(
+          this,
+          Invocation.getter(#unAuthedDio),
+        ),
+        returnValueForMissingStub: _FakeDio_0(
           this,
           Invocation.getter(#unAuthedDio),
         ),
@@ -115,14 +115,14 @@ class MockNetworkService extends _i1.Mock implements _i3.NetworkService {
 ///
 /// See the documentation for Mockito's code generation for more information.
 class MockDio extends _i1.Mock implements _i2.Dio {
-  MockDio() {
-    _i1.throwOnMissingStub(this);
-  }
-
   @override
   _i2.BaseOptions get options => (super.noSuchMethod(
         Invocation.getter(#options),
         returnValue: _FakeBaseOptions_1(
+          this,
+          Invocation.getter(#options),
+        ),
+        returnValueForMissingStub: _FakeBaseOptions_1(
           this,
           Invocation.getter(#options),
         ),
@@ -141,6 +141,10 @@ class MockDio extends _i1.Mock implements _i2.Dio {
   _i2.HttpClientAdapter get httpClientAdapter => (super.noSuchMethod(
         Invocation.getter(#httpClientAdapter),
         returnValue: _FakeHttpClientAdapter_2(
+          this,
+          Invocation.getter(#httpClientAdapter),
+        ),
+        returnValueForMissingStub: _FakeHttpClientAdapter_2(
           this,
           Invocation.getter(#httpClientAdapter),
         ),
@@ -163,6 +167,10 @@ class MockDio extends _i1.Mock implements _i2.Dio {
           this,
           Invocation.getter(#transformer),
         ),
+        returnValueForMissingStub: _FakeTransformer_3(
+          this,
+          Invocation.getter(#transformer),
+        ),
       ) as _i2.Transformer);
 
   @override
@@ -178,6 +186,10 @@ class MockDio extends _i1.Mock implements _i2.Dio {
   _i2.Interceptors get interceptors => (super.noSuchMethod(
         Invocation.getter(#interceptors),
         returnValue: _FakeInterceptors_4(
+          this,
+          Invocation.getter(#interceptors),
+        ),
+        returnValueForMissingStub: _FakeInterceptors_4(
           this,
           Invocation.getter(#interceptors),
         ),
@@ -225,6 +237,20 @@ class MockDio extends _i1.Mock implements _i2.Dio {
             },
           ),
         )),
+        returnValueForMissingStub:
+            _i4.Future<_i2.Response<T>>.value(_FakeResponse_5<T>(
+          this,
+          Invocation.method(
+            #head,
+            [path],
+            {
+              #data: data,
+              #queryParameters: queryParameters,
+              #options: options,
+              #cancelToken: cancelToken,
+            },
+          ),
+        )),
       ) as _i4.Future<_i2.Response<T>>);
 
   @override
@@ -245,6 +271,19 @@ class MockDio extends _i1.Mock implements _i2.Dio {
           },
         ),
         returnValue: _i4.Future<_i2.Response<T>>.value(_FakeResponse_5<T>(
+          this,
+          Invocation.method(
+            #headUri,
+            [uri],
+            {
+              #data: data,
+              #options: options,
+              #cancelToken: cancelToken,
+            },
+          ),
+        )),
+        returnValueForMissingStub:
+            _i4.Future<_i2.Response<T>>.value(_FakeResponse_5<T>(
           this,
           Invocation.method(
             #headUri,
@@ -293,6 +332,21 @@ class MockDio extends _i1.Mock implements _i2.Dio {
             },
           ),
         )),
+        returnValueForMissingStub:
+            _i4.Future<_i2.Response<T>>.value(_FakeResponse_5<T>(
+          this,
+          Invocation.method(
+            #get,
+            [path],
+            {
+              #data: data,
+              #queryParameters: queryParameters,
+              #options: options,
+              #cancelToken: cancelToken,
+              #onReceiveProgress: onReceiveProgress,
+            },
+          ),
+        )),
       ) as _i4.Future<_i2.Response<T>>);
 
   @override
@@ -315,6 +369,20 @@ class MockDio extends _i1.Mock implements _i2.Dio {
           },
         ),
         returnValue: _i4.Future<_i2.Response<T>>.value(_FakeResponse_5<T>(
+          this,
+          Invocation.method(
+            #getUri,
+            [uri],
+            {
+              #data: data,
+              #options: options,
+              #cancelToken: cancelToken,
+              #onReceiveProgress: onReceiveProgress,
+            },
+          ),
+        )),
+        returnValueForMissingStub:
+            _i4.Future<_i2.Response<T>>.value(_FakeResponse_5<T>(
           this,
           Invocation.method(
             #getUri,
@@ -367,6 +435,22 @@ class MockDio extends _i1.Mock implements _i2.Dio {
             },
           ),
         )),
+        returnValueForMissingStub:
+            _i4.Future<_i2.Response<T>>.value(_FakeResponse_5<T>(
+          this,
+          Invocation.method(
+            #post,
+            [path],
+            {
+              #data: data,
+              #queryParameters: queryParameters,
+              #options: options,
+              #cancelToken: cancelToken,
+              #onSendProgress: onSendProgress,
+              #onReceiveProgress: onReceiveProgress,
+            },
+          ),
+        )),
       ) as _i4.Future<_i2.Response<T>>);
 
   @override
@@ -391,6 +475,21 @@ class MockDio extends _i1.Mock implements _i2.Dio {
           },
         ),
         returnValue: _i4.Future<_i2.Response<T>>.value(_FakeResponse_5<T>(
+          this,
+          Invocation.method(
+            #postUri,
+            [uri],
+            {
+              #data: data,
+              #options: options,
+              #cancelToken: cancelToken,
+              #onSendProgress: onSendProgress,
+              #onReceiveProgress: onReceiveProgress,
+            },
+          ),
+        )),
+        returnValueForMissingStub:
+            _i4.Future<_i2.Response<T>>.value(_FakeResponse_5<T>(
           this,
           Invocation.method(
             #postUri,
@@ -444,6 +543,22 @@ class MockDio extends _i1.Mock implements _i2.Dio {
             },
           ),
         )),
+        returnValueForMissingStub:
+            _i4.Future<_i2.Response<T>>.value(_FakeResponse_5<T>(
+          this,
+          Invocation.method(
+            #put,
+            [path],
+            {
+              #data: data,
+              #queryParameters: queryParameters,
+              #options: options,
+              #cancelToken: cancelToken,
+              #onSendProgress: onSendProgress,
+              #onReceiveProgress: onReceiveProgress,
+            },
+          ),
+        )),
       ) as _i4.Future<_i2.Response<T>>);
 
   @override
@@ -468,6 +583,21 @@ class MockDio extends _i1.Mock implements _i2.Dio {
           },
         ),
         returnValue: _i4.Future<_i2.Response<T>>.value(_FakeResponse_5<T>(
+          this,
+          Invocation.method(
+            #putUri,
+            [uri],
+            {
+              #data: data,
+              #options: options,
+              #cancelToken: cancelToken,
+              #onSendProgress: onSendProgress,
+              #onReceiveProgress: onReceiveProgress,
+            },
+          ),
+        )),
+        returnValueForMissingStub:
+            _i4.Future<_i2.Response<T>>.value(_FakeResponse_5<T>(
           this,
           Invocation.method(
             #putUri,
@@ -521,6 +651,22 @@ class MockDio extends _i1.Mock implements _i2.Dio {
             },
           ),
         )),
+        returnValueForMissingStub:
+            _i4.Future<_i2.Response<T>>.value(_FakeResponse_5<T>(
+          this,
+          Invocation.method(
+            #patch,
+            [path],
+            {
+              #data: data,
+              #queryParameters: queryParameters,
+              #options: options,
+              #cancelToken: cancelToken,
+              #onSendProgress: onSendProgress,
+              #onReceiveProgress: onReceiveProgress,
+            },
+          ),
+        )),
       ) as _i4.Future<_i2.Response<T>>);
 
   @override
@@ -545,6 +691,21 @@ class MockDio extends _i1.Mock implements _i2.Dio {
           },
         ),
         returnValue: _i4.Future<_i2.Response<T>>.value(_FakeResponse_5<T>(
+          this,
+          Invocation.method(
+            #patchUri,
+            [uri],
+            {
+              #data: data,
+              #options: options,
+              #cancelToken: cancelToken,
+              #onSendProgress: onSendProgress,
+              #onReceiveProgress: onReceiveProgress,
+            },
+          ),
+        )),
+        returnValueForMissingStub:
+            _i4.Future<_i2.Response<T>>.value(_FakeResponse_5<T>(
           this,
           Invocation.method(
             #patchUri,
@@ -592,6 +753,20 @@ class MockDio extends _i1.Mock implements _i2.Dio {
             },
           ),
         )),
+        returnValueForMissingStub:
+            _i4.Future<_i2.Response<T>>.value(_FakeResponse_5<T>(
+          this,
+          Invocation.method(
+            #delete,
+            [path],
+            {
+              #data: data,
+              #queryParameters: queryParameters,
+              #options: options,
+              #cancelToken: cancelToken,
+            },
+          ),
+        )),
       ) as _i4.Future<_i2.Response<T>>);
 
   @override
@@ -612,6 +787,19 @@ class MockDio extends _i1.Mock implements _i2.Dio {
           },
         ),
         returnValue: _i4.Future<_i2.Response<T>>.value(_FakeResponse_5<T>(
+          this,
+          Invocation.method(
+            #deleteUri,
+            [uri],
+            {
+              #data: data,
+              #options: options,
+              #cancelToken: cancelToken,
+            },
+          ),
+        )),
+        returnValueForMissingStub:
+            _i4.Future<_i2.Response<T>>.value(_FakeResponse_5<T>(
           this,
           Invocation.method(
             #deleteUri,
@@ -655,6 +843,26 @@ class MockDio extends _i1.Mock implements _i2.Dio {
           },
         ),
         returnValue:
+            _i4.Future<_i2.Response<dynamic>>.value(_FakeResponse_5<dynamic>(
+          this,
+          Invocation.method(
+            #download,
+            [
+              urlPath,
+              savePath,
+            ],
+            {
+              #onReceiveProgress: onReceiveProgress,
+              #queryParameters: queryParameters,
+              #cancelToken: cancelToken,
+              #deleteOnError: deleteOnError,
+              #lengthHeader: lengthHeader,
+              #data: data,
+              #options: options,
+            },
+          ),
+        )),
+        returnValueForMissingStub:
             _i4.Future<_i2.Response<dynamic>>.value(_FakeResponse_5<dynamic>(
           this,
           Invocation.method(
@@ -722,6 +930,25 @@ class MockDio extends _i1.Mock implements _i2.Dio {
             },
           ),
         )),
+        returnValueForMissingStub:
+            _i4.Future<_i2.Response<dynamic>>.value(_FakeResponse_5<dynamic>(
+          this,
+          Invocation.method(
+            #downloadUri,
+            [
+              uri,
+              savePath,
+            ],
+            {
+              #onReceiveProgress: onReceiveProgress,
+              #cancelToken: cancelToken,
+              #deleteOnError: deleteOnError,
+              #lengthHeader: lengthHeader,
+              #data: data,
+              #options: options,
+            },
+          ),
+        )),
       ) as _i4.Future<_i2.Response<dynamic>>);
 
   @override
@@ -748,6 +975,22 @@ class MockDio extends _i1.Mock implements _i2.Dio {
           },
         ),
         returnValue: _i4.Future<_i2.Response<T>>.value(_FakeResponse_5<T>(
+          this,
+          Invocation.method(
+            #request,
+            [url],
+            {
+              #data: data,
+              #queryParameters: queryParameters,
+              #cancelToken: cancelToken,
+              #options: options,
+              #onSendProgress: onSendProgress,
+              #onReceiveProgress: onReceiveProgress,
+            },
+          ),
+        )),
+        returnValueForMissingStub:
+            _i4.Future<_i2.Response<T>>.value(_FakeResponse_5<T>(
           this,
           Invocation.method(
             #request,
@@ -799,6 +1042,21 @@ class MockDio extends _i1.Mock implements _i2.Dio {
             },
           ),
         )),
+        returnValueForMissingStub:
+            _i4.Future<_i2.Response<T>>.value(_FakeResponse_5<T>(
+          this,
+          Invocation.method(
+            #requestUri,
+            [uri],
+            {
+              #data: data,
+              #cancelToken: cancelToken,
+              #options: options,
+              #onSendProgress: onSendProgress,
+              #onReceiveProgress: onReceiveProgress,
+            },
+          ),
+        )),
       ) as _i4.Future<_i2.Response<T>>);
 
   @override
@@ -809,6 +1067,14 @@ class MockDio extends _i1.Mock implements _i2.Dio {
           [requestOptions],
         ),
         returnValue: _i4.Future<_i2.Response<T>>.value(_FakeResponse_5<T>(
+          this,
+          Invocation.method(
+            #fetch,
+            [requestOptions],
+          ),
+        )),
+        returnValueForMissingStub:
+            _i4.Future<_i2.Response<T>>.value(_FakeResponse_5<T>(
           this,
           Invocation.method(
             #fetch,

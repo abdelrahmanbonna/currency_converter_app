@@ -4,11 +4,12 @@ import 'package:currency_converter_app/Features/CurrencyConverter/Data/DataSourc
 import 'package:currency_converter_app/Features/CurrencyConverter/Data/Models/convert_rate_model.dart';
 import 'package:dio/dio.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:mockito/annotations.dart';
 import 'package:mockito/mockito.dart';
+import 'package:intl/intl.dart';
 
-class MockNetworkService extends Mock implements NetworkService {}
-
-class MockDio extends Mock implements Dio {}
+@GenerateNiceMocks([MockSpec<NetworkService>(), MockSpec<Dio>()])
+import 'currency_converter_remote_data_source_test.mocks.dart';
 
 void main() {
   late CurrencyConverterRemoteDataSource dataSource;
@@ -22,12 +23,13 @@ void main() {
     dataSource = CurrencyConverterRemoteDataSource(mockNetworkService);
   });
 
-  group('CurrencyConverterRemoteDataSource', () {
-    test('getCurrencyConvert makes correct API request', () async {
+  group('getCurrencyConvert', () {
+    test('makes correct API request', () async {
       // arrange
       final model = ConvertRateModel(
         baseCurrency: 'USD',
         convertCurrency: 'EUR',
+        amount: 100,
       );
 
       when(mockDio.get(
@@ -50,19 +52,108 @@ void main() {
           ));
 
       // act
-      await dataSource.getCurrencyConvert(model);
+      final result = await dataSource.getCurrencyConvert(model);
 
       // assert
       verify(mockDio.get(
         EndPointsPaths.convertEndPoint,
         queryParameters: {
           'q': 'USD_EUR',
-          EndPointsPaths.apiKeyParamName: EndPointsPaths.apiKey,
         },
       ));
+
+      expect(result.statusCode, 200);
+      expect(result.data['results']['USD_EUR']['val'], 0.947355);
     });
 
-    test('getHistoricalData makes correct API request', () async {
+    test('throws error on API failure', () async {
+      // arrange
+      final model = ConvertRateModel(
+        baseCurrency: 'USD',
+        convertCurrency: 'EUR',
+        amount: 100,
+      );
+
+      when(mockDio.get(
+        EndPointsPaths.convertEndPoint,
+        queryParameters: anyNamed('queryParameters'),
+      )).thenThrow(DioException(
+        requestOptions: RequestOptions(path: ''),
+        error: 'Network error',
+      ));
+
+      // act & assert
+      expect(() => dataSource.getCurrencyConvert(model), throwsA(isA<DioException>()));
+    });
+  });
+
+  group('getHistoricalData', () {
+    test('makes correct API request with date range', () async {
+      // arrange
+      final model = ConvertRateModel(
+        baseCurrency: 'USD',
+        convertCurrency: 'EUR',
+        from: DateTime(2024, 1, 1),
+        to: DateTime(2024, 1, 7),
+      );
+
+      final dateFormat = DateFormat('yyyy-MM-dd');
+
+      when(mockDio.get(
+        EndPointsPaths.convertEndPoint,
+        queryParameters: anyNamed('queryParameters'),
+      )).thenAnswer((_) async => Response(
+            requestOptions: RequestOptions(path: ''),
+            statusCode: 200,
+            data: {
+              'query': {'count': 1},
+              'results': {
+                'USD_EUR': {
+                  'id': 'USD_EUR',
+                  'val': 0.947355,
+                  'to': 'EUR',
+                  'fr': 'USD'
+                }
+              }
+            },
+          ));
+
+      // act
+      final result = await dataSource.getHistoricalData(model);
+
+      // assert
+      verify(mockDio.get(
+        EndPointsPaths.convertEndPoint,
+        queryParameters: {
+          'q': 'USD_EUR',
+          'date': dateFormat.format(model.from!),
+          'endDate': dateFormat.format(model.to!),
+          'compact': 'ultra',
+        },
+      ));
+
+      expect(result.statusCode, 200);
+      expect(result.data['results']['USD_EUR']['val'], 0.947355);
+    });
+
+    test('throws error when dates are missing', () async {
+      // arrange
+      final model = ConvertRateModel(
+        baseCurrency: 'USD',
+        convertCurrency: 'EUR',
+      );
+
+      // act & assert
+      expect(() => dataSource.getHistoricalData(model), 
+        throwsA(isA<ArgumentError>().having(
+          (e) => e.message, 
+          'message', 
+          'From and To dates are required for historical data'
+        ))
+      );
+    });
+
+    test('throws error on historical data API failure', () async {
       // arrange
       final model = ConvertRateModel(
         baseCurrency: 'USD',
@@ -72,72 +163,15 @@ void main() {
       );
 
       when(mockDio.get(
-        EndPointsPaths.historicalDataEndPoint,
+        EndPointsPaths.convertEndPoint,
         queryParameters: anyNamed('queryParameters'),
-      )).thenAnswer((_) async => Response(
-            requestOptions: RequestOptions(path: ''),
-            statusCode: 200,
-            data: {
-              'query': {'count': 1},
-              'results': {
-                'USD_EUR': {
-                  'id': 'USD_EUR',
-                  'val': 0.947355,
-                  'to': 'EUR',
-                  'fr': 'USD'
-                }
-              }
-            },
-          ));
-
-      // act
-      await dataSource.getHistoricalData(model);
-
-      // assert
-      verify(mockDio.get(
-        EndPointsPaths.historicalDataEndPoint,
-        queryParameters: {
-          'q': 'USD_EUR',
-          'date_from': '2024-1-1',
-          'date_to': '2024-1-7',
-          EndPointsPaths.apiKeyParamName: EndPointsPaths.apiKey,
-        },
+      )).thenThrow(DioException(
+        requestOptions: RequestOptions(path: ''),
+        error: 'Network error',
       ));
-    });
 
-    test('getCurrencies makes correct API request', () async {
-      // arrange
-      when(mockDio.get(
-        EndPointsPaths.currenciesEndPoint,
-        queryParameters: anyNamed('queryParameters'),
-      )).thenAnswer((_) async => Response(
-            requestOptions: RequestOptions(path: ''),
-            statusCode: 200,
-            data: {
-              'results': {
-                'USD': {
-                  'currencyName': 'US Dollar',
-                  'currencySymbol': '\$',
-                },
-                'EUR': {
-                  'currencyName': 'Euro',
-                  'currencySymbol': '€',
-                },
-              }
-            },
-          ));
-
-      // act
-      await dataSource.getCurrencies();
-
-      // assert
-      verify(mockDio.get(
-        EndPointsPaths.currenciesEndPoint,
-        queryParameters: {
-          'currencies': '',
-          EndPointsPaths.apiKeyParamName: EndPointsPaths.apiKey,
-        },
-      ));
+      // act & assert
+      expect(() => dataSource.getHistoricalData(model), throwsA(isA<DioException>()));
     });
   });
 }

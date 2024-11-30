@@ -1,4 +1,4 @@
-import 'package:currency_converter_app/Core/Config/app_theme.dart';
+// ignore_for_file: public_member_api_docs, sort_constructors_first
 import 'package:currency_picker/currency_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -6,12 +6,20 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_bounceable/flutter_bounceable.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 
+import 'package:currency_converter_app/Core/Config/app_theme.dart';
+
 import '../../../../Core/Config/app_constants.dart';
 import '../../../../Core/Services/dependancy_injection_service.dart';
 import '../Blocs/CurrencyConverter/currency_converter_bloc.dart';
 
 class CurrencyConverterCard extends StatefulWidget {
-  const CurrencyConverterCard({super.key});
+  final TextEditingController baseCurrencyController;
+  final TextEditingController convertCurrencyController;
+  const CurrencyConverterCard({
+    Key? key,
+    required this.baseCurrencyController,
+    required this.convertCurrencyController,
+  }) : super(key: key);
 
   @override
   State<CurrencyConverterCard> createState() => _CurrencyConverterCardState();
@@ -83,7 +91,8 @@ class _CurrencyConverterCardState extends State<CurrencyConverterCard> {
                                             favorite: ['EGP', 'USD'],
                                             onSelect: (Currency currency) {
                                               setState(() {
-                                                baseCurrency = currency.code;
+                                                widget.baseCurrencyController
+                                                    .text = baseCurrency;
                                               });
                                             },
                                           );

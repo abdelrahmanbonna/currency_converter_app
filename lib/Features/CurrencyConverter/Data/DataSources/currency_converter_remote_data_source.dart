@@ -15,7 +15,6 @@ class CurrencyConverterRemoteDataSource implements CurrencyConverterDataSource {
   Future<Response> getCurrencyConvert(ConvertRateModel data) {
     Map<String, dynamic> queryParam = {
       'q': '${data.baseCurrency}_${data.convertCurrency}',
-      EndPointsPaths.apiKeyParamName: EndPointsPaths.apiKey,
     };
 
     return _networkService.unAuthedDio.get(
@@ -33,14 +32,13 @@ class CurrencyConverterRemoteDataSource implements CurrencyConverterDataSource {
     final dateFormat = DateFormat('yyyy-MM-dd');
     Map<String, dynamic> queryParam = {
       'q': '${data.baseCurrency}_${data.convertCurrency}',
-      EndPointsPaths.apiKeyParamName: EndPointsPaths.apiKey,
       'date': dateFormat.format(data.from!),
       'endDate': dateFormat.format(data.to!),
       'compact': 'ultra'
     };
 
     return _networkService.unAuthedDio.get(
-      EndPointsPaths.historicalDataEndPoint,
+      EndPointsPaths.convertEndPoint,
       queryParameters: queryParam,
     );
   }

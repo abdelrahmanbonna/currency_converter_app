@@ -2,8 +2,10 @@ import 'package:currency_converter_app/Features/CurrencyConverter/Data/DataSourc
 import 'package:currency_converter_app/Features/CurrencyConverter/Data/Repositories/currency_converter_repository_imp.dart';
 import 'package:currency_converter_app/Features/CurrencyConverter/Domain/UseCases/get_convert_rate_use_case.dart';
 import 'package:currency_converter_app/Features/CurrencyConverter/Domain/UseCases/get_currencies_use_case.dart';
+import 'package:currency_converter_app/Features/CurrencyConverter/Domain/UseCases/get_historucal_rates_use_case.dart';
 import 'package:currency_converter_app/Features/CurrencyConverter/Presentation/Blocs/CurrencyConverter/currency_converter_bloc.dart';
 import 'package:currency_converter_app/Features/CurrencyConverter/Presentation/Blocs/ExchangeRates/exchange_rates_bloc.dart';
+import 'package:currency_converter_app/Features/CurrencyConverter/Presentation/Blocs/HistoricalRates/historical_rates_bloc.dart';
 import 'package:dio/dio.dart';
 import 'package:get_it/get_it.dart';
 import 'package:hive/hive.dart';
@@ -66,6 +68,9 @@ class DependencyInjectionService {
     sl.registerLazySingleton<GetCurrenciesUseCase>(
       () => GetCurrenciesUseCase(sl()),
     );
+    sl.registerLazySingleton<GetHistorucalRatesUseCase>(
+      () => GetHistorucalRatesUseCase(sl()),
+    );
   }
 
   Future<void> registerBlocs() async {
@@ -74,6 +79,9 @@ class DependencyInjectionService {
     );
     sl.registerLazySingleton<ExchangeRatesBloc>(
       () => ExchangeRatesBloc(),
+    );
+    sl.registerLazySingleton<HistoricalRatesBloc>(
+      () => HistoricalRatesBloc(sl()),
     );
   }
 }

@@ -18,16 +18,22 @@ class CurrencyConverterRepositoryImp implements CurrencyConverterRepository {
   Future<Result<ConvertRateEntity>> getConvertRates(
       ConvertRateEntity info) async {
     try {
-      final result =
-          await _dataSource.getCurrencyConvert(ConvertRateModel.fromEntity(info));
+      final result = await _dataSource
+          .getCurrencyConvert(ConvertRateModel.fromEntity(info));
 
       if (result.statusCode == 200) {
         final String pairKey = '${info.baseCurrency}_${info.convertCurrency}';
         final rateData = result.data['results'][pairKey];
-        
+
         if (rateData == null) {
+          // Try to get from cache if remote data is invalid
+          final cachedResult = await _getCachedConvertRates(info);
+          if (cachedResult != null) {
+            return Result.value(cachedResult);
+          }
+
           return Result.error(
-            ServerFailure(
+            const ServerFailure(
               "Invalid response: Missing conversion rate data",
             ),
           );
@@ -42,8 +48,17 @@ class CurrencyConverterRepositoryImp implements CurrencyConverterRepository {
           amount: info.amount,
         );
 
+        // Save successful response to cache
+        await _cacheDataSource.setCurrencyConvertData(data.toMap());
+
         return Result.value(data);
       } else {
+        // Try to get from cache if remote request fails
+        final cachedResult = await _getCachedConvertRates(info);
+        if (cachedResult != null) {
+          return Result.value(cachedResult);
+        }
+
         return Result.error(
           ServerFailure(
             "Server Failure\nStatus code:${result.statusCode}\nCouldn't get data from server",
@@ -51,53 +66,111 @@ class CurrencyConverterRepositoryImp implements CurrencyConverterRepository {
         );
       }
     } catch (e) {
+      // Try to get from cache if remote request throws error
+      final cachedResult = await _getCachedConvertRates(info);
+      if (cachedResult != null) {
+        return Result.value(cachedResult);
+      }
+
       return Result.error(
         ServerFailure(
-          "Error processing response: ${e.toString()}",
+          "Server Failure\n${e.toString()}",
         ),
       );
     }
+  }
+
+  Future<ConvertRateEntity?> _getCachedConvertRates(
+      ConvertRateEntity info) async {
+    try {
+      final cachedResult = await _cacheDataSource
+          .getCurrencyConvert(ConvertRateModel.fromEntity(info));
+
+      if (cachedResult.statusCode == 200) {
+        final String pairKey = '${info.baseCurrency}_${info.convertCurrency}';
+        final rateData = cachedResult.data['results'][pairKey];
+
+        if (rateData != null) {
+          return ConvertRateEntity(
+            convertCurrency: rateData['to'],
+            baseCurrency: rateData['fr'],
+            from: info.from,
+            to: info.to,
+            rate: (rateData['val'] as num).toDouble(),
+            amount: info.amount,
+          );
+        }
+      }
+    } catch (e) {
+      // If cache retrieval fails, return null to continue with error flow
+      return null;
+    }
+    return null;
   }
 
   @override
   Future<Result<List<ConvertRateEntity>>> getHistoricalRates(
       ConvertRateEntity info) async {
     try {
-      final result =
-          await _dataSource.getHistoricalData(ConvertRateModel.fromEntity(info));
+      final result = await _dataSource
+          .getHistoricalData(ConvertRateModel.fromEntity(info));
 
       if (result.statusCode == 200) {
         final List<ConvertRateEntity> rates = [];
         final Map<String, dynamic> historicalData = result.data;
         
-        historicalData.forEach((date, value) {
-          if (value != null) {
-            rates.add(ConvertRateEntity(
-              convertCurrency: info.convertCurrency,
-              baseCurrency: info.baseCurrency,
-              rate: (value as num).toDouble(),
-              from: DateTime.parse(date),
-              to: DateTime.parse(date),
-              amount: info.amount,
-            ));
-          }
-        });
-
-        // Sort rates by date
-        rates.sort((a, b) => a.from!.compareTo(b.from!));
+        print('Historical Data Response: $historicalData'); // Debug log
         
-        return Result.value(rates);
+        // Get the currency pair key (e.g., "USD_EUR")
+        final String pairKey = '${info.baseCurrency}_${info.convertCurrency}';
+        print('Looking for pair key: $pairKey'); // Debug log
+        
+        final Map<String, dynamic>? pairData = historicalData[pairKey] as Map<String, dynamic>?;
+        print('Pair data found: $pairData'); // Debug log
+        
+        if (pairData != null) {
+          pairData.forEach((dateStr, value) {
+            final rate = double.tryParse(value.toString());
+            final date = DateTime.tryParse(dateStr);
+            
+            print('Parsing date: $dateStr, rate: $value'); // Debug log
+            
+            if (rate != null && date != null) {
+              rates.add(ConvertRateEntity(
+                baseCurrency: info.baseCurrency,
+                convertCurrency: info.convertCurrency,
+                rate: rate,
+                from: date,
+              ));
+            }
+          });
+
+          print('Parsed rates count: ${rates.length}'); // Debug log
+          
+          // Sort rates by date
+          rates.sort((a, b) => a.from!.compareTo(b.from!));
+          
+          return Result.value(rates);
+        }
+        
+        return Result.error(
+          ServerFailure(
+            'No historical data found for $pairKey',
+          ),
+        );
       } else {
         return Result.error(
           ServerFailure(
-            "Server Failure\nStatus code:${result.statusCode}\nCouldn't get historical data",
+            result.data['msg'] ?? 'Failed to fetch historical rates',
           ),
         );
       }
-    } catch (e) {
+    } catch (e, stackTrace) {
+      print('Error in getHistoricalRates: $e'); // Debug log
+      print('Stack trace: $stackTrace'); // Debug log
       return Result.error(
         ServerFailure(
-          "Error processing historical data: ${e.toString()}",
+          e.toString(),
         ),
       );
     }

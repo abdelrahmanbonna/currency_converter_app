@@ -32,7 +32,7 @@ class NetworkService {
       InterceptorsWrapper(
         onRequest:
             (RequestOptions requestOptions, RequestInterceptorHandler handler) {
-          requestOptions.queryParameters['apikey'] = AppConstants.apiKey;
+          requestOptions.queryParameters['apiKey'] = AppConstants.apiKey;
           debugPrint("url: ${requestOptions.uri.path}");
           debugPrint("headers: ${requestOptions.headers}");
           debugPrint("headers: ${requestOptions.queryParameters}");

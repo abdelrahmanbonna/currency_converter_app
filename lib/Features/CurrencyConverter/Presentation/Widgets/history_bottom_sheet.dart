@@ -1,12 +1,15 @@
 import 'package:currency_converter_app/Core/Config/app_theme.dart';
 import 'package:currency_converter_app/Features/CurrencyConverter/Domain/Entities/convert_rate_entity.dart';
-import 'package:currency_converter_app/Features/CurrencyConverter/Presentation/Bloc/currency_converter_bloc.dart';
+import 'package:currency_converter_app/Features/CurrencyConverter/Presentation/Blocs/HistoricalRates/historical_rates_bloc.dart';
+import 'package:currency_converter_app/Features/CurrencyConverter/Presentation/Blocs/HistoricalRates/historical_rates_events.dart';
+import 'package:currency_converter_app/Features/CurrencyConverter/Presentation/Blocs/HistoricalRates/historical_rates_states.dart';
 import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:intl/intl.dart';
 import 'package:syncfusion_flutter_datepicker/datepicker.dart';
+import 'dart:math' show min, max;
 
 class HistoryBottomSheet extends StatefulWidget {
   final String baseCurrency;
@@ -35,7 +38,7 @@ class _HistoryBottomSheetState extends State<HistoryBottomSheet> {
   }
 
   void _fetchHistoricalData() {
-    context.read<CurrencyConverterBloc>().add(
+    context.read<HistoricalRatesBloc>().add(
           GetHistoricalRatesEvent(
             ConvertRateEntity(
               baseCurrency: widget.baseCurrency,
@@ -97,8 +100,11 @@ class _HistoryBottomSheetState extends State<HistoryBottomSheet> {
               ),
             ),
             SizedBox(height: 8.h),
-            BlocBuilder<CurrencyConverterBloc, CurrencyConverterState>(
+            BlocBuilder<HistoricalRatesBloc, HistoricalRatesState>(
               builder: (context, state) {
+                print('Current state: $state');
+                print('Historical rates: ${state.historicalRates}');
+
                 if (state is LoadingHistoricalRatesState) {
                   return const Expanded(
                     child: Center(
@@ -110,44 +116,85 @@ class _HistoryBottomSheetState extends State<HistoryBottomSheet> {
                 if (state is ErrorHistoricalRatesState) {
                   return Expanded(
                     child: Center(
-                      child: Column(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          Icon(
-                            Icons.error_outline,
-                            color: Colors.red,
-                            size: 48.sp,
-                          ),
-                          SizedBox(height: 16.h),
-                          Text(
-                            'Error loading historical data',
-                            style: TextStyle(
-                              color: Colors.white70,
-                              fontSize: 16.sp,
-                            ),
-                          ),
-                          TextButton(
-                            onPressed: _fetchHistoricalData,
-                            child: const Text('Retry'),
-                          ),
-                        ],
+                      child: Text(
+                        state.errorMessage,
+                        style: TextStyle(
+                          color: Colors.red,
+                          fontSize: 16.sp,
+                        ),
                       ),
                     ),
                   );
                 }
 
-                if (state is LoadedHistoricalRatesState) {
+                if (state is HistoricalRatesFetchSuccess) {
+                  print('Success state rates: ${state.historicalRates}');
+                  if (state.historicalRates.isEmpty) {
+                    return const Expanded(
+                      child: Center(
+                        child: Text(
+                          'No historical data available',
+                          style: TextStyle(
+                            color: Colors.white70,
+                          ),
+                        ),
+                      ),
+                    );
+                  }
+
                   return Expanded(
                     child: Column(
                       children: [
-                        SizedBox(
-                          height: 200.h,
+                        Expanded(
                           child: LineChart(
                             LineChartData(
                               gridData: const FlGridData(show: false),
                               titlesData: FlTitlesData(
-                                leftTitles: const AxisTitles(
-                                  sideTitles: SideTitles(showTitles: false),
+                                leftTitles: AxisTitles(
+                                  sideTitles: SideTitles(
+                                    showTitles: true,
+                                    reservedSize: 60,
+                                    getTitlesWidget: (value, meta) {
+                                      return Text(
+                                        value.toStringAsFixed(3),
+                                        style: const TextStyle(
+                                          color: Colors.white70,
+                                          fontSize: 12,
+                                        ),
+                                      );
+                                    },
+                                  ),
+                                ),
+                                bottomTitles: AxisTitles(
+                                  sideTitles: SideTitles(
+                                    showTitles: true,
+                                    reservedSize: 35,
+                                    interval: 1,
+                                    getTitlesWidget: (value, meta) {
+                                      if (value.toInt() >= 0 &&
+                                          value.toInt() <
+                                              state.historicalRates.length) {
+                                        final date = state
+                                            .historicalRates[value.toInt()]
+                                            .from;
+                                        return Padding(
+                                          padding:
+                                              const EdgeInsets.only(top: 8.0),
+                                          child: Transform.rotate(
+                                            angle: -0.5,
+                                            child: Text(
+                                              DateFormat('MM/dd').format(date!),
+                                              style: const TextStyle(
+                                                color: Colors.white70,
+                                                fontSize: 12,
+                                              ),
+                                            ),
+                                          ),
+                                        );
+                                      }
+                                      return const Text('');
+                                    },
+                                  ),
                                 ),
                                 rightTitles: const AxisTitles(
                                   sideTitles: SideTitles(showTitles: false),
@@ -155,80 +202,36 @@ class _HistoryBottomSheetState extends State<HistoryBottomSheet> {
                                 topTitles: const AxisTitles(
                                   sideTitles: SideTitles(showTitles: false),
                                 ),
-                                bottomTitles: AxisTitles(
-                                  sideTitles: SideTitles(
-                                    showTitles: true,
-                                    getTitlesWidget: (value, meta) {
-                                      if (value.toInt() >= 0 &&
-                                          value.toInt() < state.rates.length) {
-                                        return Padding(
-                                          padding: EdgeInsets.only(top: 8.h),
-                                          child: Text(
-                                            DateFormat('MM/dd').format(
-                                              state.rates[value.toInt()].from!,
-                                            ),
-                                            style: TextStyle(
-                                              color: Colors.white70,
-                                              fontSize: 12.sp,
-                                            ),
-                                          ),
-                                        );
-                                      }
-                                      return const SizedBox();
-                                    },
-                                  ),
-                                ),
                               ),
                               borderData: FlBorderData(show: false),
                               lineBarsData: [
                                 LineChartBarData(
-                                  spots: state.rates
-                                      .asMap()
-                                      .entries
-                                      .map((entry) => FlSpot(
-                                            entry.key.toDouble(),
-                                            entry.value.rate,
-                                          ))
-                                      .toList(),
+                                  spots: List.generate(
+                                    state.historicalRates.length,
+                                    (index) => FlSpot(
+                                      index.toDouble(),
+                                      state.historicalRates[index].rate,
+                                    ),
+                                  ),
                                   isCurved: true,
-                                  color: AppColors.primaryColor,
+                                  color: Colors.blue,
                                   barWidth: 2,
-                                  isStrokeCapRound: true,
                                   dotData: const FlDotData(show: false),
                                   belowBarData: BarAreaData(
                                     show: true,
-                                    color: AppColors.primaryColor.withOpacity(0.1),
+                                    color: Colors.blue.withOpacity(0.1),
                                   ),
                                 ),
                               ],
+                              minY: state.historicalRates
+                                      .map((e) => e.rate)
+                                      .reduce(min) *
+                                  0.99,
+                              maxY: state.historicalRates
+                                      .map((e) => e.rate)
+                                      .reduce(max) *
+                                  1.01,
                             ),
-                          ),
-                        ),
-                        SizedBox(height: 16.h),
-                        Expanded(
-                          child: ListView.builder(
-                            itemCount: state.rates.length,
-                            itemBuilder: (context, index) {
-                              final rate = state.rates[index];
-                              return ListTile(
-                                title: Text(
-                                  DateFormat('MMM dd, yyyy')
-                                      .format(rate.from!),
-                                  style: TextStyle(
-                                    color: Colors.white,
-                                    fontSize: 14.sp,
-                                  ),
-                                ),
-                                trailing: Text(
-                                  rate.rate.toStringAsFixed(6),
-                                  style: TextStyle(
-                                    color: AppColors.primaryColor,
-                                    fontSize: 14.sp,
-                                    fontWeight: FontWeight.bold,
-                                  ),
-                                ),
-                              );
-                            },
                           ),
                         ),
                       ],
@@ -236,7 +239,16 @@ class _HistoryBottomSheetState extends State<HistoryBottomSheet> {
                   );
                 }
 
-                return const SizedBox();
+                return const Expanded(
+                  child: Center(
+                    child: Text(
+                      'Select a date range to view historical rates',
+                      style: TextStyle(
+                        color: Colors.white70,
+                      ),
+                    ),
+                  ),
+                );
               },
             ),
           ],
@@ -246,18 +258,24 @@ class _HistoryBottomSheetState extends State<HistoryBottomSheet> {
   }
 
   void _showDateRangePicker(BuildContext context) {
+    final size = MediaQuery.of(context).size;
     showDialog(
       context: context,
       builder: (context) => Dialog(
-        backgroundColor: AppColors.darkBlue,
-        child: Padding(
-          padding: EdgeInsets.all(16.sp),
+        backgroundColor: Colors.transparent,
+        child: Container(
+          width: size.width * 0.85,
+          padding: const EdgeInsets.all(16),
+          decoration: BoxDecoration(
+            color: AppColors.veryDarkBlue,
+            borderRadius: BorderRadius.circular(16),
+          ),
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
               SfDateRangePicker(
-                initialSelectedRange: PickerDateRange(startDate, endDate),
                 selectionMode: DateRangePickerSelectionMode.range,
+                initialSelectedRange: PickerDateRange(startDate, endDate),
                 maxDate: DateTime.now(),
                 onSelectionChanged: (args) {
                   if (args.value is PickerDateRange) {
@@ -267,27 +285,52 @@ class _HistoryBottomSheetState extends State<HistoryBottomSheet> {
                         startDate = range.startDate!;
                         endDate = range.endDate!;
                       });
+                      _fetchHistoricalData();
+                      Navigator.pop(context);
                     }
                   }
                 },
-              ),
-              SizedBox(height: 16.h),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.end,
-                children: [
-                  TextButton(
-                    onPressed: () => Navigator.pop(context),
-                    child: const Text('Cancel'),
+                headerStyle: const DateRangePickerHeaderStyle(
+                  textStyle: TextStyle(
+                    color: Colors.white,
+                    fontSize: 18,
+                    fontWeight: FontWeight.bold,
                   ),
-                  SizedBox(width: 8.w),
-                  ElevatedButton(
-                    onPressed: () {
-                      Navigator.pop(context);
-                      _fetchHistoricalData();
-                    },
-                    child: const Text('Apply'),
+                ),
+                monthViewSettings: const DateRangePickerMonthViewSettings(
+                  viewHeaderStyle: DateRangePickerViewHeaderStyle(
+                    textStyle: TextStyle(
+                      color: Colors.white,
+                      fontWeight: FontWeight.w600,
+                      fontSize: 14,
+                    ),
                   ),
-                ],
+                ),
+                monthCellStyle: DateRangePickerMonthCellStyle(
+                  textStyle: const TextStyle(color: Colors.white70),
+                  disabledDatesTextStyle:
+                      TextStyle(color: Colors.white.withOpacity(0.3)),
+                  todayTextStyle: const TextStyle(color: Colors.white),
+                ),
+                yearCellStyle: DateRangePickerYearCellStyle(
+                  textStyle: const TextStyle(color: Colors.white70),
+                  disabledDatesTextStyle:
+                      TextStyle(color: Colors.white.withOpacity(0.3)),
+                  todayTextStyle: const TextStyle(color: Colors.white),
+                ),
+                selectionTextStyle: const TextStyle(
+                  color: Colors.white,
+                  fontWeight: FontWeight.bold,
+                ),
+                rangeTextStyle: const TextStyle(
+                  color: Colors.white,
+                  fontWeight: FontWeight.bold,
+                ),
+                selectionColor: Colors.blue,
+                rangeSelectionColor: Colors.blue.withOpacity(0.3),
+                startRangeSelectionColor: Colors.blue,
+                endRangeSelectionColor: Colors.blue,
+                todayHighlightColor: Colors.blue,
               ),
             ],
           ),
