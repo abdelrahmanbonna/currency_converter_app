@@ -7,6 +7,11 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
+TextEditingController baseCurrencyController =
+    TextEditingController(text: 'USD');
+TextEditingController targetCurrencyController =
+    TextEditingController(text: 'EUR');
+
 class CurrencyConverterHome extends StatefulWidget {
   const CurrencyConverterHome({super.key});
 
@@ -15,10 +20,6 @@ class CurrencyConverterHome extends StatefulWidget {
 }
 
 class _CurrencyConverterHomeState extends State<CurrencyConverterHome> {
-  TextEditingController baseCurrencyController =
-      TextEditingController(text: 'USD');
-  TextEditingController targetCurrencyController =
-      TextEditingController(text: 'EUR');
   @override
   Widget build(BuildContext context) {
     return GestureDetector(

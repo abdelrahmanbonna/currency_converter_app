@@ -1,10 +1,8 @@
 import 'package:dio/dio.dart';
-import 'package:flutter/cupertino.dart';
 import 'package:flutter_easyloading/flutter_easyloading.dart';
 
 import '../Config/app_constants.dart';
 
-/// Handles all the http network calls over the network
 class NetworkService {
   static NetworkService? _this;
 
@@ -24,7 +22,6 @@ class NetworkService {
     initializeInterceptors();
   }
 
-  /// initializing interceptors to handle api calls and to log the requests/responses
   void initializeInterceptors() {
     unAuthedDio.interceptors.clear();
 
@@ -33,24 +30,14 @@ class NetworkService {
         onRequest:
             (RequestOptions requestOptions, RequestInterceptorHandler handler) {
           requestOptions.queryParameters['apiKey'] = AppConstants.apiKey;
-          debugPrint("url: ${requestOptions.uri.path}");
-          debugPrint("headers: ${requestOptions.headers}");
-          debugPrint("headers: ${requestOptions.queryParameters}");
-          debugPrint("body: ${requestOptions.data}");
           handler.next(requestOptions);
         },
         onResponse:
             (Response<dynamic> response, ResponseInterceptorHandler handler) {
-          debugPrint("status code: ${response.statusCode}");
-          debugPrint("response: ${response.data}");
           handler.next(response);
         },
         onError: (DioException error, ErrorInterceptorHandler errorHandler) {
           EasyLoading.dismiss();
-          debugPrint("error status code: ${error.response?.statusCode}");
-          debugPrint("error: ${error.response?.data}");
-          debugPrint("errorMessage: ${error.message}");
-
           errorHandler.next(error);
         },
       ),

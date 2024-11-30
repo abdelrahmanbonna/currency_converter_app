@@ -7,6 +7,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:hive/hive.dart';
 import 'package:mockito/annotations.dart';
 import 'package:mockito/mockito.dart';
+import 'package:intl/intl.dart';
 
 @GenerateNiceMocks([MockSpec<Box>()])
 import 'currency_converter_cache_data_source_test.mocks.dart';
@@ -21,7 +22,64 @@ void main() {
   });
 
   group('getCurrencyConvert', () {
-    final model = ConvertRateModel(
+    const testModel = ConvertRateModel(
+      baseCurrency: 'USD',
+      convertCurrency: 'EUR',
+      amount: 100,
+    );
+
+    final cacheKey = '${AppConstants.exchangeRatesDBKey}_${testModel.baseCurrency}_${testModel.convertCurrency}';
+    final mockData = {
+      'results': {
+        'USD_EUR': {
+          'id': 'USD_EUR',
+          'val': 0.947355,
+          'to': 'EUR',
+          'fr': 'USD'
+        }
+      }
+    };
+
+    test('returns cached data when available', () async {
+      // Arrange
+      when(mockBox.get(cacheKey)).thenReturn(jsonEncode(mockData));
+
+      // Act
+      final result = await dataSource.getCurrencyConvert(testModel);
+
+      // Assert
+      verify(mockBox.get(cacheKey));
+      expect(result.statusCode, 200);
+      expect(result.data, mockData);
+    });
+
+    test('returns 404 when cache is empty', () async {
+      // Arrange
+      when(mockBox.get(cacheKey)).thenReturn(null);
+
+      // Act
+      final result = await dataSource.getCurrencyConvert(testModel);
+
+      // Assert
+      verify(mockBox.get(cacheKey));
+      expect(result.statusCode, 404);
+      expect(result.data, {'msg': 'Data not found'});
+    });
+
+    test('handles invalid cache data gracefully', () async {
+      // Arrange
+      when(mockBox.get(cacheKey)).thenReturn('invalid json');
+
+      // Act & Assert
+      expect(
+        () => dataSource.getCurrencyConvert(testModel),
+        throwsA(isA<FormatException>()),
+      );
+    });
+  });
+
+  group('getHistoricalData', () {
+    final testModel = ConvertRateModel(
       baseCurrency: 'USD',
       convertCurrency: 'EUR',
       amount: 100,
@@ -29,40 +87,114 @@ void main() {
       to: DateTime(2024, 1, 7),
     );
 
-    test('returns cached data when available', () async {
-      final cacheKey = '${AppConstants.exchangeRatesDBKey}_${model.baseCurrency}_${model.convertCurrency}';
-      final mockData = {
-        'results': {
-          'USD_EUR': {
-            'id': 'USD_EUR',
-            'val': 0.947355,
-            'to': 'EUR',
-            'fr': 'USD'
-          }
-        }
-      };
+    final dateFormat = DateFormat('yyyy-MM-dd');
+    final cacheKey = '${AppConstants.historicalRatesDBKey}_${testModel.baseCurrency}_${testModel.convertCurrency}_${dateFormat.format(testModel.from!)}_${dateFormat.format(testModel.to!)}';
+    final mockData = {
+      'USD_EUR': {
+        '2024-01-01': 0.947355,
+        '2024-01-07': 0.948123,
+      }
+    };
 
+    test('returns cached historical data when available', () async {
+      // Arrange
       when(mockBox.get(cacheKey)).thenReturn(jsonEncode(mockData));
 
-      final result = await dataSource.getCurrencyConvert(model);
+      // Act
+      final result = await dataSource.getHistoricalData(testModel);
 
+      // Assert
+      verify(mockBox.get(cacheKey));
       expect(result.statusCode, 200);
       expect(result.data, mockData);
     });
 
-    test('returns 404 when cache is empty', () async {
-      final cacheKey = '${AppConstants.exchangeRatesDBKey}_${model.baseCurrency}_${model.convertCurrency}';
+    test('returns 404 when historical cache is empty', () async {
+      // Arrange
       when(mockBox.get(cacheKey)).thenReturn(null);
 
-      final result = await dataSource.getCurrencyConvert(model);
+      // Act
+      final result = await dataSource.getHistoricalData(testModel);
 
+      // Assert
+      verify(mockBox.get(cacheKey));
+      expect(result.statusCode, 404);
+      expect(result.data, {'msg': 'Data not found'});
+    });
+
+    test('throws ArgumentError when dates are missing', () async {
+      // Arrange
+      const invalidModel = ConvertRateModel(
+        baseCurrency: 'USD',
+        convertCurrency: 'EUR',
+        amount: 100,
+      );
+
+      // Act & Assert
+      expect(
+        () => dataSource.getHistoricalData(invalidModel),
+        throwsA(isA<ArgumentError>()),
+      );
+    });
+  });
+
+  group('getCurrencies', () {
+    const cacheKey = AppConstants.currencyDBKey;
+    final mockData = {
+      'results': {
+        'USD': {'currencyName': 'US Dollar', 'currencySymbol': '\$'},
+        'EUR': {'currencyName': 'Euro', 'currencySymbol': '€'},
+      }
+    };
+
+    test('returns cached currencies when available', () async {
+      // Arrange
+      when(mockBox.get(cacheKey)).thenReturn(jsonEncode(mockData));
+
+      // Act
+      final result = await dataSource.getCurrencies();
+
+      // Assert
+      verify(mockBox.get(cacheKey));
+      expect(result.statusCode, 200);
+      expect(result.data, mockData);
+    });
+
+    test('returns 404 when currencies cache is empty', () async {
+      // Arrange
+      when(mockBox.get(cacheKey)).thenReturn(null);
+
+      // Act
+      final result = await dataSource.getCurrencies();
+
+      // Assert
+      verify(mockBox.get(cacheKey));
       expect(result.statusCode, 404);
       expect(result.data, {'msg': 'Data not found'});
     });
   });
 
+  group('setCurrencyData', () {
+    test('stores currency data with correct cache key', () async {
+      // Arrange
+      final mockData = {
+        'results': {
+          'USD': {'currencyName': 'US Dollar', 'currencySymbol': '\$'},
+          'EUR': {'currencyName': 'Euro', 'currencySymbol': '€'},
+        }
+      };
+
+      // Act
+      await dataSource.setCurrencyData(mockData);
+
+      // Assert
+      verify(mockBox.put(AppConstants.currencyDBKey, jsonEncode(mockData)));
+    });
+  });
+
   group('setCurrencyConvertData', () {
-    test('stores data with correct cache key', () async {
+    test('stores conversion data with correct cache key', () async {
+      // Arrange
       final mockData = {
         'results': {
           'USD_EUR': {
@@ -74,79 +206,42 @@ void main() {
         }
       };
 
-      const expectedCacheKey = '${AppConstants.exchangeRatesDBKey}_USD_EUR';
-
+      // Act
       await dataSource.setCurrencyConvertData(mockData);
 
-      verify(mockBox.put(expectedCacheKey, jsonEncode(mockData))).called(1);
-    });
-  });
-
-  group('getHistoricalData', () {
-    final model = ConvertRateModel(
-      baseCurrency: 'USD',
-      convertCurrency: 'EUR',
-      from: DateTime(2024, 1, 1),
-      to: DateTime(2024, 1, 7),
-    );
-
-    test('returns filtered historical data when available', () async {
-      final cacheKey = '${AppConstants.historicalRatesDBKey}_${model.baseCurrency}_${model.convertCurrency}';
-      final mockData = {
-        'results': {
-          'USD_EUR_2024-01-01': {'val': 0.91},
-          'USD_EUR_2024-01-02': {'val': 0.92},
-          'USD_EUR_2024-01-08': {'val': 0.93}, // Outside date range
-        },
-        'query': {'count': 3}
-      };
-
-      when(mockBox.get(cacheKey)).thenReturn(jsonEncode(mockData));
-
-      final result = await dataSource.getHistoricalData(model);
-
-      expect(result.statusCode, 200);
-      expect(result.data['results'].length, 2);
-      expect(result.data['results'].containsKey('USD_EUR_2024-01-08'), false);
-    });
-
-    test('returns 404 when historical cache is empty', () async {
-      final cacheKey = '${AppConstants.historicalRatesDBKey}_${model.baseCurrency}_${model.convertCurrency}';
-      when(mockBox.get(cacheKey)).thenReturn(null);
-
-      final result = await dataSource.getHistoricalData(model);
-
-      expect(result.statusCode, 404);
-      expect(result.data, {'msg': 'Data not found'});
+      // Assert
+      verify(mockBox.put(
+        '${AppConstants.exchangeRatesDBKey}_USD_EUR',
+        jsonEncode(mockData),
+      ));
     });
   });
 
   group('setHistoricalData', () {
-    test('merges and stores historical data with correct cache key', () async {
-      final existingData = {
-        'results': {
-          'USD_EUR_2024-01-01': {'val': 0.91},
-        },
-        'query': {'count': 1}
+    test('stores historical data with correct cache key', () async {
+      // Arrange
+      final testModel = ConvertRateModel(
+        baseCurrency: 'USD',
+        convertCurrency: 'EUR',
+        from: DateTime(2024, 1, 1),
+        to: DateTime(2024, 1, 7),
+      );
+
+      final mockData = {
+        'USD_EUR': {
+          '2024-01-01': 0.947355,
+          '2024-01-07': 0.948123,
+        }
       };
 
-      final newData = {
-        'results': {
-          'USD_EUR_2024-01-02': {'val': 0.92},
-        },
-        'query': {'count': 1}
-      };
+      final dateFormat = DateFormat('yyyy-MM-dd');
+      final expectedCacheKey = '${AppConstants.historicalRatesDBKey}_${testModel.baseCurrency}_${testModel.convertCurrency}_${dateFormat.format(testModel.from!)}_${dateFormat.format(testModel.to!)}';
 
-      const cacheKey = '${AppConstants.historicalRatesDBKey}_USD_EUR';
-      
-      when(mockBox.get(cacheKey)).thenReturn(jsonEncode(existingData));
+      // Act
+      await dataSource.setHistoricalData(mockData, testModel);
 
-      await dataSource.setHistoricalData(newData);
-
-      verify(mockBox.put(
-        cacheKey,
-        any,
-      )).called(1);
+      // Assert
+      verify(mockBox.put(expectedCacheKey, jsonEncode(mockData)));
     });
   });
 }

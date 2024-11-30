@@ -1,7 +1,6 @@
 import 'package:currency_converter_app/Features/CurrencyConverter/Presentation/Pages/currency_converter_home.dart';
 import 'package:flutter/material.dart';
 
-/// Holds all the routes and it's names in the app
 class AppRoutes {
   static const String initial = '/';
 

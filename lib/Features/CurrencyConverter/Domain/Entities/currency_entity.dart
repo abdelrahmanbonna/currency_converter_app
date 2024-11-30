@@ -1,52 +1,37 @@
-/// symbol : "$"
-/// name : "US Dollar"
-/// symbol_native : "$"
-/// decimal_digits : 2
-/// rounding : 0
-/// code : "USD"
-/// name_plural : "US dollars"
-/// type : "fiat"
+import 'package:equatable/equatable.dart';
+import 'package:flutter/foundation.dart';
 
-class CurrencyEntity {
-  String? _symbol;
-  String? _name;
-  String? _symbolNative;
-  num? _decimalDigits;
-  num? _rounding;
-  String? _code;
-  String? _namePlural;
-  String? _type;
+@immutable
+class CurrencyEntity extends Equatable {
+  final String? symbol;
+  final String? name;
+  final String? symbolNative;
+  final num? decimalDigits;
+  final num? rounding;
+  final String? code;
+  final String? namePlural;
+  final String? type;
 
-  CurrencyEntity({
-    String? symbol,
-    String? name,
-    String? symbolNative,
-    num? decimalDigits,
-    num? rounding,
-    String? code,
-    String? namePlural,
-    String? type,
-  }) {
-    _symbol = symbol;
-    _name = name;
-    _symbolNative = symbolNative;
-    _decimalDigits = decimalDigits;
-    _rounding = rounding;
-    _code = code;
-    _namePlural = namePlural;
-    _type = type;
-  }
+  const CurrencyEntity({
+    this.symbol,
+    this.name,
+    this.symbolNative,
+    this.decimalDigits,
+    this.rounding,
+    this.code,
+    this.namePlural,
+    this.type,
+  });
 
-  CurrencyEntity.fromJson(dynamic json) {
-    _symbol = json['symbol'];
-    _name = json['name'];
-    _symbolNative = json['symbol_native'];
-    _decimalDigits = json['decimal_digits'];
-    _rounding = json['rounding'];
-    _code = json['code'];
-    _namePlural = json['name_plural'];
-    _type = json['type'];
-  }
+  CurrencyEntity.fromJson(dynamic json)
+      : symbol = json['symbol'],
+        name = json['name'],
+        symbolNative = json['symbol_native'],
+        decimalDigits = json['decimal_digits'],
+        rounding = json['rounding'],
+        code = json['code'],
+        namePlural = json['name_plural'],
+        type = json['type'];
 
   CurrencyEntity copyWith({
     String? symbol,
@@ -59,42 +44,38 @@ class CurrencyEntity {
     String? type,
   }) =>
       CurrencyEntity(
-        symbol: symbol ?? _symbol,
-        name: name ?? _name,
-        symbolNative: symbolNative ?? _symbolNative,
-        decimalDigits: decimalDigits ?? _decimalDigits,
-        rounding: rounding ?? _rounding,
-        code: code ?? _code,
-        namePlural: namePlural ?? _namePlural,
-        type: type ?? _type,
+        symbol: symbol ?? this.symbol,
+        name: name ?? this.name,
+        symbolNative: symbolNative ?? this.symbolNative,
+        decimalDigits: decimalDigits ?? this.decimalDigits,
+        rounding: rounding ?? this.rounding,
+        code: code ?? this.code,
+        namePlural: namePlural ?? this.namePlural,
+        type: type ?? this.type,
       );
-
-  String? get symbol => _symbol;
-
-  String? get name => _name;
-
-  String? get symbolNative => _symbolNative;
-
-  num? get decimalDigits => _decimalDigits;
-
-  num? get rounding => _rounding;
-
-  String? get code => _code;
-
-  String? get namePlural => _namePlural;
-
-  String? get type => _type;
 
   Map<String, dynamic> toJson() {
     final map = <String, dynamic>{};
-    map['symbol'] = _symbol;
-    map['name'] = _name;
-    map['symbol_native'] = _symbolNative;
-    map['decimal_digits'] = _decimalDigits;
-    map['rounding'] = _rounding;
-    map['code'] = _code;
-    map['name_plural'] = _namePlural;
-    map['type'] = _type;
+    map['symbol'] = symbol;
+    map['name'] = name;
+    map['symbol_native'] = symbolNative;
+    map['decimal_digits'] = decimalDigits;
+    map['rounding'] = rounding;
+    map['code'] = code;
+    map['name_plural'] = namePlural;
+    map['type'] = type;
     return map;
   }
+
+  @override
+  List<Object?> get props => [
+        symbol,
+        name,
+        symbolNative,
+        decimalDigits,
+        rounding,
+        code,
+        namePlural,
+        type,
+      ];
 }

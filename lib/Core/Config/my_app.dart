@@ -3,12 +3,11 @@ import 'package:currency_converter_app/Features/CurrencyConverter/Presentation/B
 import 'package:flutter/material.dart';
 import 'package:flutter_easyloading/flutter_easyloading.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
-import 'package:flutter_bloc/flutter_bloc.dart'; // Add this line
+import 'package:flutter_bloc/flutter_bloc.dart';
 
 import 'app_routes.dart';
 import 'app_theme.dart';
 
-/// This key is used to make redirections outside the pages
 final GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();
 
 void showSnackBar(String message) {
@@ -26,7 +25,6 @@ void showSnackBar(String message) {
 class MyApp extends StatelessWidget {
   const MyApp({super.key});
 
-  // This widget is the root of your application.
   @override
   Widget build(BuildContext context) {
     return ScreenUtilInit(

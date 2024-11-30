@@ -1,15 +1,16 @@
-// ignore_for_file: public_member_api_docs, sort_constructors_first
+import 'package:cached_network_image/cached_network_image.dart';
+import 'package:currency_converter_app/Core/Config/app_constants.dart';
+import 'package:currency_converter_app/Core/Config/app_theme.dart';
+import 'package:currency_converter_app/Core/Services/dependancy_injection_service.dart';
+import 'package:currency_converter_app/Features/CurrencyConverter/Presentation/Pages/currency_converter_home.dart';
 import 'package:currency_picker/currency_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_bounceable/flutter_bounceable.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 
-import 'package:currency_converter_app/Core/Config/app_theme.dart';
-
-import '../../../../Core/Config/app_constants.dart';
-import '../../../../Core/Services/dependancy_injection_service.dart';
 import '../Blocs/CurrencyConverter/currency_converter_bloc.dart';
 
 class CurrencyConverterCard extends StatefulWidget {
@@ -88,17 +89,19 @@ class _CurrencyConverterCardState extends State<CurrencyConverterCard> {
                                             showFlag: true,
                                             showCurrencyName: true,
                                             showCurrencyCode: true,
-                                            favorite: ['EGP', 'USD'],
+                                            favorite: ['EGP', 'USD', 'EUR'],
                                             onSelect: (Currency currency) {
                                               setState(() {
+                                                baseCurrency = currency.code;
                                                 widget.baseCurrencyController
                                                     .text = baseCurrency;
                                               });
                                             },
                                           );
                                         },
-                                        child: Image.network(
-                                          "${AppConstants.iconsBaseUrl}/256x192/${baseCurrency.substring(0, baseCurrency.length - 1).toLowerCase()}.png",
+                                        child: CachedNetworkImage(
+                                          imageUrl:
+                                              "${AppConstants.iconsBaseUrl}/256x192/${baseCurrency.substring(0, baseCurrency.length - 1).toLowerCase()}.png",
                                         ),
                                       ),
                                     ),
@@ -121,7 +124,21 @@ class _CurrencyConverterCardState extends State<CurrencyConverterCard> {
                                         });
                                       },
                                       decoration: InputDecoration(
-                                        border: InputBorder.none,
+                                        border: const OutlineInputBorder(
+                                          borderSide: BorderSide(
+                                            color: Colors.white,
+                                          ),
+                                        ),
+                                        focusedBorder: const OutlineInputBorder(
+                                          borderSide: BorderSide(
+                                            color: Colors.white,
+                                          ),
+                                        ),
+                                        enabledBorder: const OutlineInputBorder(
+                                          borderSide: BorderSide(
+                                            color: Colors.white,
+                                          ),
+                                        ),
                                         hintText: amount.toString(),
                                         hintStyle: appTheme
                                             .textTheme.bodyMedium!
@@ -140,19 +157,24 @@ class _CurrencyConverterCardState extends State<CurrencyConverterCard> {
                                           showFlag: true,
                                           showCurrencyName: true,
                                           showCurrencyCode: true,
-                                          favorite: ['EGP', 'USD'],
+                                          favorite: ['EGP', 'USD', 'EUR'],
                                           onSelect: (Currency currency) {
                                             setState(() {
                                               baseCurrency = currency.code;
+                                              baseCurrencyController.text =
+                                                  baseCurrency;
                                             });
                                           },
                                         );
                                       },
-                                      child: Text(
-                                        baseCurrency.toString(),
-                                        style: appTheme.textTheme.bodyMedium!
-                                            .copyWith(
-                                          color: Colors.white,
+                                      child: Padding(
+                                        padding: const EdgeInsets.all(8.0),
+                                        child: Text(
+                                          baseCurrency.toString(),
+                                          style: appTheme.textTheme.bodyMedium!
+                                              .copyWith(
+                                            color: Colors.white,
+                                          ),
                                         ),
                                       ),
                                     ),
@@ -177,16 +199,19 @@ class _CurrencyConverterCardState extends State<CurrencyConverterCard> {
                                       showFlag: true,
                                       showCurrencyName: true,
                                       showCurrencyCode: true,
-                                      favorite: ['EGP', 'USD'],
+                                      favorite: ['EGP', 'USD', 'EUR'],
                                       onSelect: (Currency currency) {
                                         setState(() {
+                                          widget.convertCurrencyController
+                                              .text = currency.code;
                                           convertCurrency = currency.code;
                                         });
                                       },
                                     );
                                   },
-                                  child: Image.network(
-                                    "${AppConstants.iconsBaseUrl}/256x192/${convertCurrency.substring(0, convertCurrency.length - 1).toLowerCase()}.png",
+                                  child: CachedNetworkImage(
+                                    imageUrl:
+                                        "${AppConstants.iconsBaseUrl}/256x192/${convertCurrency.substring(0, convertCurrency.length - 1).toLowerCase()}.png",
                                   ),
                                 ),
                               ),
@@ -208,9 +233,11 @@ class _CurrencyConverterCardState extends State<CurrencyConverterCard> {
                                     showFlag: true,
                                     showCurrencyName: true,
                                     showCurrencyCode: true,
-                                    favorite: ['EGP', 'USD'],
+                                    favorite: ['EGP', 'USD', 'EUR'],
                                     onSelect: (Currency currency) {
                                       setState(() {
+                                        widget.convertCurrencyController.text =
+                                            currency.code;
                                         convertCurrency = currency.code;
                                       });
                                     },

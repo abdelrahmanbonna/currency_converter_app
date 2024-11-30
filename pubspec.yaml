@@ -38,6 +38,7 @@ dependencies:
   fl_chart: ^0.65.0
   # date range picker
   syncfusion_flutter_datepicker: ^24.1.41
+  cached_network_image: ^3.3.0
 
 dev_dependencies:
   flutter_test:

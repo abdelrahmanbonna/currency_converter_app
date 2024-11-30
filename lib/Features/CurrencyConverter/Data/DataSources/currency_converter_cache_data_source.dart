@@ -5,178 +5,102 @@ import 'package:currency_converter_app/Features/CurrencyConverter/Data/DataSourc
 import 'package:currency_converter_app/Features/CurrencyConverter/Data/Models/convert_rate_model.dart';
 import 'package:dio/dio.dart';
 import 'package:hive/hive.dart';
+import 'package:intl/intl.dart';
 
 class CurrencyConverterCacheDataSource implements CurrencyConverterDataSource {
   final Box _box;
   CurrencyConverterCacheDataSource(this._box);
 
+  Response _notFoundResponse() {
+    return Response(
+      requestOptions: RequestOptions(path: ''),
+      data: {'msg': 'Data not found'},
+      statusCode: 404,
+    );
+  }
+
   @override
-  Future<Response> getCurrencies() {
+  Future<Response> getCurrencies() async {
     final data = _box.get(AppConstants.currencyDBKey);
+    if (data == null) return _notFoundResponse();
 
-    if (data != null) {
-      final jsonData = jsonDecode(data);
-      return Future.value(
-        Response(
-          requestOptions: RequestOptions(
-            data: jsonData,
-          ),
-          data: jsonData,
-          statusCode: 200,
-        ),
-      );
-    } else {
-      return Future.value(
-        Response(
-          requestOptions: RequestOptions(
-            data: {"msg": "Data not found"},
-          ),
-          data: {"msg": "Data not found"},
-          statusCode: 404,
-        ),
-      );
-    }
-  }
-
-  setCurrencyData(Map data) async {
-    var dataInJSON = jsonEncode(data);
-
-    _box.put(AppConstants.currencyDBKey, dataInJSON);
-  }
-
-  @override
-  Future<Response> getCurrencyConvert(ConvertRateModel data) {
-    final String cacheKey = '${AppConstants.exchangeRatesDBKey}_${data.baseCurrency}_${data.convertCurrency}';
-    final cachedData = _box.get(cacheKey);
-
-    if (cachedData != null) {
-      final jsonData = jsonDecode(cachedData);
-      return Future.value(
-        Response(
-          requestOptions: RequestOptions(
-            data: jsonData,
-          ),
-          data: jsonData,
-          statusCode: 200,
-        ),
-      );
-    } else {
-      return Future.value(
-        Response(
-          requestOptions: RequestOptions(
-            data: {"msg": "Data not found"},
-          ),
-          data: {"msg": "Data not found"},
-          statusCode: 404,
-        ),
-      );
-    }
-  }
-
-  setCurrencyConvertData(Map data) async {
-    if (data['results'] == null || (data['results'] as Map).isEmpty) {
-      return; // Don't cache invalid data
-    }
-    
-    final String pairKey = data['results'].keys.first;
-    final String cacheKey = '${AppConstants.exchangeRatesDBKey}_$pairKey';
-    
-    var dataInJSON = jsonEncode(data);
-    _box.put(cacheKey, dataInJSON);
-  }
-
-  @override
-  Future<Response> getHistoricalData(ConvertRateModel data) {
-    final String cacheKey = '${AppConstants.historicalRatesDBKey}_${data.baseCurrency}_${data.convertCurrency}';
-    final historicalData = _box.get(cacheKey);
-
-    if (historicalData != null) {
-      final jsonData = jsonDecode(historicalData);
-
-      // Filter historical data based on input parameters
-      final filteredData = _filterHistoricalData(jsonData, data);
-
-      return Future.value(
-        Response(
-          requestOptions: RequestOptions(
-            data: filteredData,
-          ),
-          data: filteredData,
-          statusCode: 200,
-        ),
-      );
-    } else {
-      return Future.value(
-        Response(
-          requestOptions: RequestOptions(
-            data: {"msg": "Data not found"},
-          ),
-          data: {"msg": "Data not found"},
-          statusCode: 404,
-        ),
-      );
-    }
-  }
-
-  setHistoricalData(Map<String, dynamic> data) async {
-    if (data['results'] == null || (data['results'] as Map).isEmpty) {
-      return; // Don't cache invalid data
-    }
-    
-    final String pairKey = data['results'].keys.first;
-    final String cacheKey = '${AppConstants.historicalRatesDBKey}_$pairKey';
-    
-    // Get existing historical data or initialize new map
-    final existingData = _box.get(cacheKey);
-    Map<String, dynamic> historicalData = existingData != null
-        ? Map<String, dynamic>.from(jsonDecode(existingData))
-        : {};
-
-    // Merge new data with existing data
-    historicalData.addAll(data);
-
-    // Store updated data
-    var dataInJSON = jsonEncode(historicalData);
-    _box.put(cacheKey, dataInJSON);
-  }
-
-  // Helper method to filter historical data
-  Map<String, dynamic> _filterHistoricalData(
-      Map<String, dynamic> historicalData, ConvertRateModel data) {
-    // Filter data based on date range only since we're already using currency-specific cache
-    final filteredData = <String, dynamic>{
-      'results': {},
-      'query': historicalData['query'] ?? {}
-    };
-
-    final results = historicalData['results'] as Map<String, dynamic>;
-    results.forEach((key, value) {
-      if (_isDateInRange(key, data.from, data.to)) {
-        filteredData['results'][key] = value;
-      }
-    });
-
-    return filteredData;
-  }
-
-  bool _isDateInRange(String key, DateTime? from, DateTime? to) {
     try {
-      final datePart = key.split('_').last;
-      if (!datePart.contains('-')) return true; // If no date in key, include it
-      
-      final date = DateTime.parse(datePart);
-
-      // If no date range is specified, return true
-      if (from == null && to == null) return true;
-
-      // Check if date is within the specified range
-      return (from == null ||
-              date.isAtSameMomentAs(from) ||
-              date.isAfter(from)) &&
-          (to == null || date.isAtSameMomentAs(to) || date.isBefore(to));
+      final jsonData = jsonDecode(data);
+      return Response(
+        requestOptions: RequestOptions(path: ''),
+        data: jsonData,
+        statusCode: 200,
+      );
     } catch (e) {
-      // If date parsing fails, return false
-      return false;
+      return _notFoundResponse();
     }
+  }
+
+  @override
+  Future<Response> getCurrencyConvert(ConvertRateModel data) async {
+    final String cacheKey =
+        '${AppConstants.exchangeRatesDBKey}_${data.baseCurrency}_${data.convertCurrency}';
+    final cachedData = _box.get(cacheKey);
+    if (cachedData == null) return _notFoundResponse();
+
+    try {
+      final jsonData = jsonDecode(cachedData);
+      return Response(
+        requestOptions: RequestOptions(path: ''),
+        data: jsonData,
+        statusCode: 200,
+      );
+    } catch (e) {
+      throw const FormatException('Invalid cache data format');
+    }
+  }
+
+  @override
+  Future<Response> getHistoricalData(ConvertRateModel data) async {
+    if (data.from == null || data.to == null) {
+      throw ArgumentError('From and To dates are required for historical data');
+    }
+
+    final dateFormat = DateFormat('yyyy-MM-dd');
+    final String cacheKey =
+        '${AppConstants.historicalRatesDBKey}_${data.baseCurrency}_${data.convertCurrency}_${dateFormat.format(data.from!)}_${dateFormat.format(data.to!)}';
+    final historicalData = _box.get(cacheKey);
+    if (historicalData == null) return _notFoundResponse();
+
+    try {
+      final jsonData = jsonDecode(historicalData);
+      return Response(
+        requestOptions: RequestOptions(path: ''),
+        data: jsonData,
+        statusCode: 200,
+      );
+    } catch (e) {
+      return _notFoundResponse();
+    }
+  }
+
+  Future<void> setCurrencyData(Map<String, dynamic> data) async {
+    final dataInJSON = jsonEncode(data);
+    await _box.put(AppConstants.currencyDBKey, dataInJSON);
+  }
+
+  Future<void> setCurrencyConvertData(Map<String, dynamic> data) async {
+    if (data['results'] == null || (data['results'] as Map).isEmpty) return;
+
+    final String pairKey = (data['results'] as Map).keys.first;
+    final String cacheKey = '${AppConstants.exchangeRatesDBKey}_$pairKey';
+    final dataInJSON = jsonEncode(data);
+    await _box.put(cacheKey, dataInJSON);
+  }
+
+  Future<void> setHistoricalData(
+      Map<String, dynamic> data, ConvertRateModel model) async {
+    if (data.isEmpty || model.from == null || model.to == null) return;
+
+    final dateFormat = DateFormat('yyyy-MM-dd');
+    final String cacheKey =
+        '${AppConstants.historicalRatesDBKey}_${model.baseCurrency}_${model.convertCurrency}_${dateFormat.format(model.from!)}_${dateFormat.format(model.to!)}';
+    final dataInJSON = jsonEncode(data);
+    await _box.put(cacheKey, dataInJSON);
   }
 }

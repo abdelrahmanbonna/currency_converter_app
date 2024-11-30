@@ -103,6 +103,31 @@ test/
 │       └── Domain/       # Domain layer tests
 ```
 
+## Key Dependencies
+
+### State Management
+
+- **flutter_bloc**: Implements the BLoC pattern for robust state management
+- **equatable**: Simplifies value equality comparisons
+
+### Networking & Data
+
+- **dio**: Modern HTTP client for efficient API communication
+- **hive**: Fast, lightweight local storage solution
+- **cached_network_image**: Optimizes image loading and caching
+  - Automatically caches network images
+  - Provides placeholder and error widgets
+  - Reduces bandwidth usage
+  - Improves app performance by avoiding repeated downloads
+  - Handles image loading states efficiently
+
+### UI/UX
+
+- **flutter_screenutil**: Ensures consistent UI across different screen sizes
+- **flutter_bounceable**: Adds engaging touch feedback
+- **currency_picker**: Provides a comprehensive currency selection interface
+- **fl_chart**: Visualizes historical exchange rate data
+
 ## Architecture & Technical Decisions
 
 ### Clean Architecture

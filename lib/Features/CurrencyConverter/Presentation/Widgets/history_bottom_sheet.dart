@@ -29,21 +29,38 @@ class HistoryBottomSheet extends StatefulWidget {
 class _HistoryBottomSheetState extends State<HistoryBottomSheet> {
   late DateTime startDate;
   late DateTime endDate;
+  late String currentBaseCurrency;
+  late String currentTargetCurrency;
 
   @override
   void initState() {
     super.initState();
     endDate = DateTime.now();
     startDate = endDate.subtract(const Duration(days: 7));
+    currentBaseCurrency = widget.baseCurrency;
+    currentTargetCurrency = widget.targetCurrency;
     _fetchHistoricalData();
+  }
+
+  @override
+  void didUpdateWidget(HistoryBottomSheet oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.baseCurrency != widget.baseCurrency || 
+        oldWidget.targetCurrency != widget.targetCurrency) {
+      setState(() {
+        currentBaseCurrency = widget.baseCurrency;
+        currentTargetCurrency = widget.targetCurrency;
+      });
+      _fetchHistoricalData();
+    }
   }
 
   void _fetchHistoricalData() {
     context.read<HistoricalRatesBloc>().add(
           GetHistoricalRatesEvent(
             ConvertRateEntity(
-              baseCurrency: widget.baseCurrency,
-              convertCurrency: widget.targetCurrency,
+              baseCurrency: currentBaseCurrency,
+              convertCurrency: currentTargetCurrency,
               from: startDate,
               to: endDate,
             ),
@@ -94,7 +111,7 @@ class _HistoryBottomSheetState extends State<HistoryBottomSheet> {
             ),
             SizedBox(height: 16.h),
             Text(
-              '${widget.baseCurrency} to ${widget.targetCurrency}',
+              '$currentBaseCurrency to $currentTargetCurrency',
               style: TextStyle(
                 color: Colors.white70,
                 fontSize: 16.sp,
