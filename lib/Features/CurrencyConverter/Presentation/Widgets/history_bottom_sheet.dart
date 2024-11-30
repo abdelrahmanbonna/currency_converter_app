@@ -4,6 +4,7 @@ import 'package:currency_converter_app/Features/CurrencyConverter/Presentation/B
 import 'package:currency_converter_app/Features/CurrencyConverter/Presentation/Blocs/HistoricalRates/historical_rates_events.dart';
 import 'package:currency_converter_app/Features/CurrencyConverter/Presentation/Blocs/HistoricalRates/historical_rates_states.dart';
 import 'package:fl_chart/fl_chart.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
@@ -102,8 +103,11 @@ class _HistoryBottomSheetState extends State<HistoryBottomSheet> {
             SizedBox(height: 8.h),
             BlocBuilder<HistoricalRatesBloc, HistoricalRatesState>(
               builder: (context, state) {
-                print('Current state: $state');
-                print('Historical rates: ${state.historicalRates}');
+                if (kDebugMode) {
+                  print('Current state: $state');
+                  print('Historical rates: ${state.historicalRates}');
+                }
+                
 
                 if (state is LoadingHistoricalRatesState) {
                   return const Expanded(
@@ -128,7 +132,9 @@ class _HistoryBottomSheetState extends State<HistoryBottomSheet> {
                 }
 
                 if (state is HistoricalRatesFetchSuccess) {
-                  print('Success state rates: ${state.historicalRates}');
+                  if (kDebugMode) {
+                    print('Success state rates: ${state.historicalRates}');
+                  }
                   if (state.historicalRates.isEmpty) {
                     return const Expanded(
                       child: Center(

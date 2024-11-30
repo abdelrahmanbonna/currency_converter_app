@@ -79,7 +79,7 @@ class CurrencyConverterCacheDataSource implements CurrencyConverterDataSource {
     }
     
     final String pairKey = data['results'].keys.first;
-    final String cacheKey = '${AppConstants.exchangeRatesDBKey}_${pairKey}';
+    final String cacheKey = '${AppConstants.exchangeRatesDBKey}_$pairKey';
     
     var dataInJSON = jsonEncode(data);
     _box.put(cacheKey, dataInJSON);
@@ -124,7 +124,7 @@ class CurrencyConverterCacheDataSource implements CurrencyConverterDataSource {
     }
     
     final String pairKey = data['results'].keys.first;
-    final String cacheKey = '${AppConstants.historicalRatesDBKey}_${pairKey}';
+    final String cacheKey = '${AppConstants.historicalRatesDBKey}_$pairKey';
     
     // Get existing historical data or initialize new map
     final existingData = _box.get(cacheKey);

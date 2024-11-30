@@ -74,7 +74,7 @@ void main() {
         }
       };
 
-      final expectedCacheKey = '${AppConstants.exchangeRatesDBKey}_USD_EUR';
+      const expectedCacheKey = '${AppConstants.exchangeRatesDBKey}_USD_EUR';
 
       await dataSource.setCurrencyConvertData(mockData);
 
@@ -137,7 +137,7 @@ void main() {
         'query': {'count': 1}
       };
 
-      final cacheKey = '${AppConstants.historicalRatesDBKey}_USD_EUR';
+      const cacheKey = '${AppConstants.historicalRatesDBKey}_USD_EUR';
       
       when(mockBox.get(cacheKey)).thenReturn(jsonEncode(existingData));
 

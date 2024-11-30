@@ -5,6 +5,7 @@ import 'package:currency_converter_app/Features/CurrencyConverter/Data/Models/co
 import 'package:currency_converter_app/Features/CurrencyConverter/Domain/Entities/convert_rate_entity.dart';
 import 'package:currency_converter_app/Features/CurrencyConverter/Domain/Entities/currency_entity.dart';
 import 'package:currency_converter_app/Features/CurrencyConverter/Domain/Repositories/currency_converter_repository.dart';
+import 'package:flutter/foundation.dart';
 
 import '../DataSources/currency_converter_cache_data_source.dart';
 
@@ -119,21 +120,29 @@ class CurrencyConverterRepositoryImp implements CurrencyConverterRepository {
         final List<ConvertRateEntity> rates = [];
         final Map<String, dynamic> historicalData = result.data;
         
-        print('Historical Data Response: $historicalData'); // Debug log
+        if (kDebugMode) {
+          print('Historical Data Response: $historicalData');
+        }
         
         // Get the currency pair key (e.g., "USD_EUR")
         final String pairKey = '${info.baseCurrency}_${info.convertCurrency}';
-        print('Looking for pair key: $pairKey'); // Debug log
+        if (kDebugMode) {
+          print('Looking for pair key: $pairKey');
+        } 
         
         final Map<String, dynamic>? pairData = historicalData[pairKey] as Map<String, dynamic>?;
-        print('Pair data found: $pairData'); // Debug log
+        if (kDebugMode) {
+          print('Pair data found: $pairData');
+        } 
         
         if (pairData != null) {
           pairData.forEach((dateStr, value) {
             final rate = double.tryParse(value.toString());
             final date = DateTime.tryParse(dateStr);
             
-            print('Parsing date: $dateStr, rate: $value'); // Debug log
+            if (kDebugMode) {
+              print('Parsing date: $dateStr, rate: $value');
+            } 
             
             if (rate != null && date != null) {
               rates.add(ConvertRateEntity(
@@ -145,7 +154,9 @@ class CurrencyConverterRepositoryImp implements CurrencyConverterRepository {
             }
           });
 
-          print('Parsed rates count: ${rates.length}'); // Debug log
+          if (kDebugMode) {
+            print('Parsed rates count: ${rates.length}');
+          }
           
           // Sort rates by date
           rates.sort((a, b) => a.from!.compareTo(b.from!));
@@ -166,8 +177,10 @@ class CurrencyConverterRepositoryImp implements CurrencyConverterRepository {
         );
       }
     } catch (e, stackTrace) {
-      print('Error in getHistoricalRates: $e'); // Debug log
-      print('Stack trace: $stackTrace'); // Debug log
+      if (kDebugMode) {
+        print('Error in getHistoricalRates: $e');
+        print('Stack trace: $stackTrace');
+      }
       return Result.error(
         ServerFailure(
           e.toString(),

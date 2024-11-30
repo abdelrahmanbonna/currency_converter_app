@@ -1,12 +1,11 @@
 import 'package:currency_converter_app/Core/Config/app_theme.dart';
 import 'package:currency_converter_app/Core/Services/dependancy_injection_service.dart';
-import 'package:currency_converter_app/Features/CurrencyConverter/Presentation/Blocs/CurrencyConverter/currency_converter_bloc.dart';
 import 'package:currency_converter_app/Features/CurrencyConverter/Presentation/Blocs/HistoricalRates/historical_rates_bloc.dart';
 import 'package:currency_converter_app/Features/CurrencyConverter/Presentation/Widgets/currency_converter_card.dart';
 import 'package:currency_converter_app/Features/CurrencyConverter/Presentation/Widgets/history_bottom_sheet.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
-import 'package:flutter_bloc/flutter_bloc.dart'; // added import
+import 'package:flutter_bloc/flutter_bloc.dart';
 
 class CurrencyConverterHome extends StatefulWidget {
   const CurrencyConverterHome({super.key});

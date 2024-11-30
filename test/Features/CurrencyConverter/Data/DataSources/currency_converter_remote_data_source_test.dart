@@ -26,7 +26,7 @@ void main() {
   group('getCurrencyConvert', () {
     test('makes correct API request', () async {
       // arrange
-      final model = ConvertRateModel(
+      const model = ConvertRateModel(
         baseCurrency: 'USD',
         convertCurrency: 'EUR',
         amount: 100,
@@ -68,7 +68,7 @@ void main() {
 
     test('throws error on API failure', () async {
       // arrange
-      final model = ConvertRateModel(
+      const model = ConvertRateModel(
         baseCurrency: 'USD',
         convertCurrency: 'EUR',
         amount: 100,
@@ -83,7 +83,8 @@ void main() {
       ));
 
       // act & assert
-      expect(() => dataSource.getCurrencyConvert(model), throwsA(isA<DioException>()));
+      expect(() => dataSource.getCurrencyConvert(model),
+          throwsA(isA<DioException>()));
     });
   });
 
@@ -138,19 +139,16 @@ void main() {
 
     test('throws error when dates are missing', () async {
       // arrange
-      final model = ConvertRateModel(
+      const model = ConvertRateModel(
         baseCurrency: 'USD',
         convertCurrency: 'EUR',
       );
 
       // act & assert
-      expect(() => dataSource.getHistoricalData(model), 
-        throwsA(isA<ArgumentError>().having(
-          (e) => e.message, 
-          'message', 
-          'From and To dates are required for historical data'
-        ))
-      );
+      expect(
+          () => dataSource.getHistoricalData(model),
+          throwsA(isA<ArgumentError>().having((e) => e.message, 'message',
+              'From and To dates are required for historical data')));
     });
 
     test('throws error on historical data API failure', () async {
@@ -171,7 +169,8 @@ void main() {
       ));
 
       // act & assert
-      expect(() => dataSource.getHistoricalData(model), throwsA(isA<DioException>()));
+      expect(() => dataSource.getHistoricalData(model),
+          throwsA(isA<DioException>()));
     });
   });
 }
